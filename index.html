@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GliomaGuard AI™ — Longitudinal Glioma Surveillance & Decision Support</title>
+  <meta name="description" content="Clinical-grade longitudinal glioma MRI analysis: dual follow-up comparison, RANO 2.0 classification, pseudo-progression detection, and explainable AI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261014_syntax_fixed_v9">
+</head>
+<body data-mobile-tab="upload" data-mri-view="split">
+
+  <!-- TOP NAVBAR -->
+  <header class="navbar" id="mainNavbar">
+    <div class="nav-left">
+      <div class="brand-logo">
+        <svg class="logo-icon" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="16" stroke="#00f0ff" stroke-width="1.8" opacity="0.5"/>
+          <circle cx="18" cy="18" r="10" stroke="#00f0ff" stroke-width="1.5"/>
+          <circle cx="18" cy="18" r="4" fill="#00f0ff"/>
+          <path d="M18 4 L18 8 M18 28 L18 32 M4 18 L8 18 M28 18 L32 18" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M14 14 L18 18 L24 12" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+          <div class="brand-title">GliomaGuard <span class="ai-badge">AI</span></div>
+          <div class="brand-subtitle">Longitudinal Glioma Surveillance · RANO 2.0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <div class="step-indicator" id="stepIndicator">
+        <div class="step-dot active" id="stepDot1">
+          <span class="step-num">1</span>
+          <span class="step-lbl">Upload Scans</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-dot" id="stepDot2">
+          <span class="step-num">2</span>
+          <span class="step-lbl">Clinical Context</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-dot" id="stepDot3">
+          <span class="step-num">3</span>
+          <span class="step-lbl">Analysis</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="patient-pill">
+        <span class="patient-id" id="navPatientId">No Patient</span>
+        <span class="visit-badge" id="navVisitBadge">—</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <nav class="mobile-tabs" id="mobileTabs">
+    <button class="tab-btn active" data-tab="upload" id="mTabUpload">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Scans & Info</span>
+    </button>
+    <button class="tab-btn" data-tab="viewer" id="mTabViewer">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M15 9l3 3-3 3"/><path d="M9 15l-3-3 3-3"/></svg>
+      <span>MRI Compare</span>
+    </button>
+    <button class="tab-btn" data-tab="rano" id="mTabRANO">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span>RANO & XAI</span>
+    </button>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <div class="app-container">
+
+    <!-- ================= STAGE 1: UPLOAD & PATIENT INFO ================= -->
+    <section class="stage-upload" id="stageUpload">
+      <div class="upload-wrapper">
+        
+        <div class="hero-header">
+          <h1>Longitudinal Glioma Surveillance</h1>
+          <p>Side-by-side comparative MRI analysis of post-operative scans to detect recurrence, quantify volumetric changes (ET, Edema, Cavity), and provide RANO 2.0 decision support with explainable AI.</p>
+        </div>
+
+        <!-- DUAL SCANS UPLOAD SECTION -->
+        <div class="dual-upload-grid">
+          
+          <!-- TP1 CARD -->
+          <div class="scan-card tp1-card">
+            <div class="scan-card-header">
+              <div class="tp-tag tp1-tag">TP-1 Baseline</div>
+              <div class="scan-card-title-group">
+                <span class="scan-title">1st Follow-Up MRI</span>
+                <span class="scan-subtitle">Earlier surveillance scan (reference baseline)</span>
+              </div>
+            </div>
+
+            <div class="drop-zone" id="dropZone1">
+              <input type="file" id="fileTP1" class="file-input-overlay" accept="image/*,.nii,.gz,.dcm" title="Click or drag to choose scan" onchange="window.handleFile1 && window.handleFile1(this.files && this.files[0])">
+              <div class="drop-content" id="dzContent1">
+                <div class="drop-icon-wrap tp1-icon">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#00f0ff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="drop-label">Drag & drop or <span class="browse-link tp1-link">Browse Scan</span></div>
+                <div class="drop-types">3D NIfTI (.nii/.gz) · DICOM · PNG · JPG</div>
+                <div class="drop-subnote">Click anywhere in this box to select scan</div>
+              </div>
+              <div class="drop-preview hidden" id="dzPreview1">
+                <div class="preview-thumb-container" id="thumbWrap1" title="Click to inspect scan (Full-Screen)">
+                  <img id="previewImg1" alt="TP1 Preview" class="preview-img">
+                  <div class="thumb-zoom-badge">🔍 Click to Preview</div>
+                </div>
+                <div class="preview-details">
+                  <span class="preview-name" id="previewName1">Scan loaded</span>
+                  <span class="preview-status success">Baseline Ready ✓</span>
+                </div>
+                <button type="button" class="btn-clear-preview" id="clearTP1" title="Remove scan">✕</button>
+              </div>
+            </div>
+
+            <div class="scan-date-row">
+              <label for="dateTP1">Scan Date (TP-1):</label>
+              <input type="date" id="dateTP1" class="date-input">
+            </div>
+          </div>
+
+          <!-- COMPARISON BADGE / DIVIDER -->
+          <div class="comparison-divider">
+            <div class="comp-line"></div>
+            <div class="comp-badge">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+              <span>VS</span>
+            </div>
+            <div class="comp-line"></div>
+          </div>
+
+          <!-- TP2 CARD -->
+          <div class="scan-card tp2-card">
+            <div class="scan-card-header">
+              <div class="tp-tag tp2-tag">TP-2 Follow-Up</div>
+              <div class="scan-card-title-group">
+                <span class="scan-title">2nd Follow-Up MRI</span>
+                <span class="scan-subtitle">Later surveillance scan (suspected progression)</span>
+              </div>
+            </div>
+
+            <div class="drop-zone" id="dropZone2">
+              <input type="file" id="fileTP2" class="file-input-overlay" accept="image/*,.nii,.gz,.dcm" title="Click or drag to choose scan" onchange="window.handleFile2 && window.handleFile2(this.files && this.files[0])">
+              <div class="drop-content" id="dzContent2">
+                <div class="drop-icon-wrap tp2-icon">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#ff3366" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="drop-label">Drag & drop or <span class="browse-link tp2-link">Browse Scan</span></div>
+                <div class="drop-types">3D NIfTI (.nii/.gz) · DICOM · PNG · JPG</div>
+                <div class="drop-subnote">Click anywhere in this box to select scan</div>
+              </div>
+              <div class="drop-preview hidden" id="dzPreview2">
+                <div class="preview-thumb-container" id="thumbWrap2" title="Click to inspect scan (Full-Screen)">
+                  <img id="previewImg2" alt="TP2 Preview" class="preview-img">
+                  <div class="thumb-zoom-badge">🔍 Click to Preview</div>
+                </div>
+                <div class="preview-details">
+                  <span class="preview-name" id="previewName2">Scan loaded</span>
+                  <span class="preview-status success">Follow-Up Ready ✓</span>
+                </div>
+                <button type="button" class="btn-clear-preview" id="clearTP2" title="Remove scan">✕</button>
+              </div>
+            </div>
+
+            <div class="scan-date-row">
+              <label for="dateTP2">Scan Date (TP-2):</label>
+              <input type="date" id="dateTP2" class="date-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- CLINICAL CONTEXT FORM -->
+        <div class="clinical-form-box">
+          <div class="form-box-header">
+            <div class="header-icon-title">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f39c12" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14h6"/><path d="M12 11v6"/></svg>
+              <h2>Patient Clinical Context</h2>
+            </div>
+            <span class="badge-opt">⚡ Auto-Detected from Scan Metadata</span>
+          </div>
+
+          <div class="form-grid-inputs">
+            <div class="field-item">
+              <label for="inputPatientId">Patient ID / Medical Record #</label>
+              <input type="text" id="inputPatientId" placeholder="e.g. PatientID_0018" class="clean-input">
+            </div>
+
+            <div class="field-item">
+              <label for="inputSurgeryDate">Surgical Resection Date</label>
+              <input type="date" id="inputSurgeryDate" class="clean-input">
+            </div>
+
+            <div class="field-item">
+              <label for="inputRadioEndDate">Radiotherapy Completion Date</label>
+              <input type="date" id="inputRadioEndDate" class="clean-input">
+              <span class="field-hint">Used for 12-week RANO 2.0 pseudo-progression evaluation</span>
+            </div>
+
+            <div class="field-item">
+              <label for="selectGrade">WHO Histological Grade</label>
+              <select id="selectGrade" class="clean-input">
+                <option value="">— Select Grade —</option>
+                <option value="grade3">Grade III (Anaplastic Astrocytoma)</option>
+                <option value="grade4" selected>Grade IV (Glioblastoma Multiforme)</option>
+              </select>
+            </div>
+
+            <div class="field-item">
+              <label for="selectMGMT">MGMT Promoter Status</label>
+              <select id="selectMGMT" class="clean-input">
+                <option value="unmethylated" selected>Unmethylated (High recurrence risk)</option>
+                <option value="methylated">Methylated (Higher pseudo-progression sensitivity)</option>
+                <option value="unknown">Unknown / Not tested</option>
+              </select>
+            </div>
+
+            <div class="field-item">
+              <label for="selectSteroids">Corticosteroid Use (Dexamethasone)</label>
+              <select id="selectSteroids" class="clean-input">
+                <option value="no" selected>No / Stable maintenance dose</option>
+                <option value="increasing">Increasing dose (Confounding enhancement)</option>
+                <option value="decreasing">Decreasing dose</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRIMARY ACTION BAR (AT THE END OF STAGE 1) -->
+        <div class="action-panel">
+          <!-- LIVE PATIENT COHORT SELECTOR (PROVES REAL DYNAMIC CALCULATION) -->
+          <div class="patient-cohort-bar">
+            <div class="cohort-label">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00f0ff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Clinical Cohorts (Internal MU-Glioma &amp; External UCSF-ALPTDG Benchmark):</span>
+            </div>
+            <div class="cohort-select-wrap">
+              <select id="selectCohortPatient" class="clean-cohort-select">
+                <optgroup label="🧪 External UCSF Validation Cohort (Section 7 Benchmark)">
+                  <option value="UCSF_100001">UCSF-100001 · Partial Response (PR, -64.7%) · Tumor Regression</option>
+                  <option value="UCSF_100005">UCSF-100005 · Stable Disease (SD, +5.9%) · Stable Surveillance</option>
+                  <option value="UCSF_100026">UCSF-100026 · Progressive Disease (PD, +49.0%) · Nodular Recurrence</option>
+                </optgroup>
+                <optgroup label="🏥 Internal MU-Glioma Development Cohort">
+                  <option value="PatientID_0018">PatientID_0018 · Progressive Disease (PD, +25.6%) · ⚠️ Pseudo-Progression Rule</option>
+                  <option value="PatientID_0003">PatientID_0003 · Stable Disease (SD, +10.1%) · Surveillance Stability</option>
+                  <option value="PatientID_0005">PatientID_0005 · Partial Response (PR, -35.5%) · Favorable Tumor Regression</option>
+                </optgroup>
+              </select>
+              <button class="btn-cohort-load" id="btnLoadCohortPatient">
+                <span>Load &amp; Calculate Patient</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="action-buttons-group">
+            <button class="btn-primary" id="btnAnalyze" disabled>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Run Longitudinal Analysis</span>
+            </button>
+            <button class="btn-secondary" id="btnLoadDemoData">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>Quick Load (UCSF-100001)</span>
+            </button>
+            <button class="btn-secondary" id="btnLoadCameraDemo" title="Test with real smartphone camera photos of hardcopy MRI film">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ff3366" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span>📷 Test Smartphone Camera Photo</span>
+            </button>
+          </div>
+          <div class="action-status" id="analyzeHint">Upload both follow-up scans or select a real clinical cohort patient</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= STAGE 2: LONGITUDINAL ANALYSIS COCKPIT ================= -->
+    <main class="stage-cockpit hidden" id="stageCockpit">
+
+      <!-- TOP COCKPIT TOOLBAR (CLEAN, LOGICAL, ACCESSIBLE) -->
+      <div class="cockpit-top-toolbar">
+        <button class="btn-back-breadcrumb" id="btnBackToUpload">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Upload &amp; Form</span>
+        </button>
+
+        <div class="cockpit-patient-switch">
+          <span class="cockpit-switch-lbl">Active Case:</span>
+          <select id="cockpitSelectPatient" class="clean-cohort-select-sm">
+            <optgroup label="🧪 External UCSF Validation">
+              <option value="UCSF_100001">UCSF-100001 · PR (-64.7%) · Regression</option>
+              <option value="UCSF_100005">UCSF-100005 · SD (+5.9%) · Stable</option>
+              <option value="UCSF_100026">UCSF-100026 · PD (+49.0%) · Recurrence</option>
+            </optgroup>
+            <optgroup label="🏥 Internal MU Cohort">
+              <option value="PatientID_0018">PatientID_0018 · PD (+25.6%) · ⚠️ Pseudo-Prog</option>
+              <option value="PatientID_0003">PatientID_0003 · SD (+10.1%) · Stable</option>
+              <option value="PatientID_0005">PatientID_0005 · PR (-35.5%) · Regression</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="global-viewer-tools">
+          <label class="toggle-lbl">
+            <input type="checkbox" id="chkSyncSlices" checked>
+            <span class="toggle-text">Sync Slices</span>
+          </label>
+          <button class="btn-subtraction" id="btnToggleSubtraction">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+            <span>Δ Subtraction Map</span>
+          </button>
+          <button class="btn-subtraction" id="btnToggleXAI" title="Display genuine model gradient attribution heatmap">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>⚡ XAI Heatmap</span>
+          </button>
+        </div>
+
+        <!-- MOBILE SEGMENTED VIEW SWITCHER -->
+        <div class="mobile-mri-toggle" id="mobileMriToggle">
+          <button class="mri-toggle-btn active" data-view="split">Side-by-Side</button>
+          <button class="mri-toggle-btn" data-view="tp1">TP-1</button>
+          <button class="mri-toggle-btn" data-view="tp2">TP-2</button>
+        </div>
+      </div>
+
+      <!-- COCKPIT 3-COLUMN / RESPONSIVE GRID -->
+      <div class="cockpit-grid">
+
+        <!-- LEFT COLUMN: TP1 VIEWER -->
+        <section class="panel-card viewer-card" id="panelTP1">
+          <div class="viewer-bar tp1-bar">
+            <div class="viewer-bar-left">
+              <span class="tp-pill tp1-pill">TP-1</span>
+              <span class="bar-title">Baseline Follow-Up</span>
+            </div>
+            <div class="viewer-bar-right">
+              <div class="mod-group">
+                <button class="mod-btn active" id="btnMod1T1c" data-panel="1" data-mod="t1c">T1c</button>
+                <button class="mod-btn" id="btnMod1Flair" data-panel="1" data-mod="flair">FLAIR</button>
+                <button class="mod-btn" id="btnMod1T1n" data-panel="1" data-mod="t1n">T1n</button>
+                <button class="mod-btn" id="btnMod1T2" data-panel="1" data-mod="t2">T2</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CLEAN CONTROL STRIP (MASK TOGGLE OUTSIDE CANVAS) -->
+          <div class="viewer-sub-toolbar">
+            <span class="sub-date" id="lblTP1Date">— / Pending Upload</span>
+            <label class="toggle-lbl">
+              <input type="checkbox" id="chkMask1" checked>
+              <span class="toggle-text">AI Segmentation Mask</span>
+            </label>
+          </div>
+
+          <div class="viewer-screen-box" id="screenBox1" title="Click to enlarge & inspect in high-resolution">
+            <canvas id="mriCanvas1" width="480" height="480"></canvas>
+            <div class="screen-badge tp1-badge-pos">TP-1 Baseline</div>
+            <button class="btn-screen-inspect" id="btnInspectTP1" title="Enlarge & Inspect (Full-Screen)">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Click to Enlarge 🔍</span>
+            </button>
+          </div>
+
+          <!-- SLICE CONTROLS -->
+          <div class="slice-controls">
+            <button class="slice-btn" id="btnPrevSlice1" title="Previous slice">◄</button>
+            <div class="slice-info">
+              <span class="slice-label">Slice: <strong id="txtSliceNum1">68</strong> / <span id="txtSliceTotal1">75</span></span>
+              <input type="range" id="rngSlice1" min="45" max="75" value="68" class="clean-slider">
+            </div>
+            <button class="slice-btn" id="btnNextSlice1" title="Next slice">►</button>
+          </div>
+
+          <!-- VOLUME BREAKDOWN -->
+          <div class="vol-table">
+            <div class="vol-cell">
+              <span class="vol-name">ET Volume</span>
+              <span class="vol-number et-color" id="volET1">— mL</span>
+            </div>
+            <div class="vol-cell">
+              <span class="vol-name">Edema (FLAIR)</span>
+              <span class="vol-number edema-color" id="volEdema1">— mL</span>
+            </div>
+            <div class="vol-cell">
+              <span class="vol-name">Cavity</span>
+              <span class="vol-number cavity-color" id="volCavity1">— mL</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTER COLUMN: RANO 2.0 & DELTA VOLUMETRICS -->
+        <section class="panel-card metrics-card" id="panelRANO">
+          
+          <!-- RANO 2.0 CLASSIFICATION HERO -->
+          <div class="rano-hero-card" id="ranoResultCard">
+            <div class="card-caption">RANO 2.0 Longitudinal Response</div>
+            <div class="rano-banner" id="ranoBadgeLarge">
+              <div class="rano-code" id="ranoCategory">PD</div>
+              <div class="rano-desc" id="ranoFullName">Progressive Disease</div>
+            </div>
+
+            <!-- PSEUDO-PROGRESSION ALERT -->
+            <div class="pseudo-box hidden" id="pseudoWarning">
+              <div class="pseudo-head">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f39c12" stroke-width="2.4"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Pseudo-Progression Rule Triggered</span>
+              </div>
+              <p id="pseudoWarningDetail">TP-2 scan is within 12 weeks of radiotherapy completion. Enhancement increase may be radiation necrosis rather than true progressive glioma. Repeat scan in 4–8 weeks recommended.</p>
+            </div>
+          </div>
+
+          <!-- DELTA VOLUME COMPARISON -->
+          <div class="delta-block">
+            <div class="block-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00f0ff" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Volumetric Δ Changes (TP1 → TP2)
+            </div>
+
+            <!-- ET DELTA -->
+            <div class="delta-row" id="deltaETCard">
+              <div class="delta-row-top">
+                <span class="delta-row-label">Enhancing Tumor (ET)</span>
+                <span class="delta-badge up" id="deltaETBadge">+21.8%</span>
+              </div>
+              <div class="delta-values">
+                <span id="deltaETFrom">52.4 mL</span>
+                <span class="delta-arrow">→</span>
+                <strong id="deltaETTo">63.8 mL</strong>
+              </div>
+              <div class="delta-meter">
+                <div class="delta-meter-fill up" id="deltaETBar" style="width: 65%;"></div>
+              </div>
+            </div>
+
+            <!-- EDEMA DELTA -->
+            <div class="delta-row" id="deltaEdemaCard">
+              <div class="delta-row-top">
+                <span class="delta-row-label">Vasogenic Edema (SNFH)</span>
+                <span class="delta-badge up" id="deltaEdemaBadge">+18.1%</span>
+              </div>
+              <div class="delta-values">
+                <span id="deltaEdemaFrom">91.7 mL</span>
+                <span class="delta-arrow">→</span>
+                <strong id="deltaEdemaTo">108.3 mL</strong>
+              </div>
+              <div class="delta-meter">
+                <div class="delta-meter-fill up" id="deltaEdemaBar" style="width: 45%;"></div>
+              </div>
+            </div>
+
+            <!-- CAVITY DELTA -->
+            <div class="delta-row" id="deltaCavityCard">
+              <div class="delta-row-top">
+                <span class="delta-row-label">Resection Cavity (RC)</span>
+                <span class="delta-badge down" id="deltaCavityBadge">-7.8%</span>
+              </div>
+              <div class="delta-values">
+                <span id="deltaCavityFrom">46.1 mL</span>
+                <span class="delta-arrow">→</span>
+                <strong id="deltaCavityTo">42.5 mL</strong>
+              </div>
+              <div class="delta-meter">
+                <div class="delta-meter-fill down" id="deltaCavityBar" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MATHEMATICAL DERIVATION & VOXEL AUDIT PROOF -->
+          <div class="math-proof-box" id="mathProofBox">
+            <div class="math-proof-header">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00f0ff" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+              <span>Transparent Voxel-Wise Mathematical Proof</span>
+              <span class="math-tag-live">LIVE COMPUTATION</span>
+            </div>
+            <div class="math-formulas-list" id="mathFormulasList">
+              <!-- Dynamically populated math audit -->
+            </div>
+          </div>
+
+          <!-- TIMELINE COMPONENT -->
+          <div class="timeline-box">
+            <div class="block-title">Surveillance Timeline</div>
+            <div class="tl-chain">
+              <div class="tl-point">
+                <div class="tl-dot surg"></div>
+                <span class="tl-title">Surgery</span>
+                <span class="tl-sub" id="tlSurgDate">—</span>
+              </div>
+              <div class="tl-connector"></div>
+              <div class="tl-point">
+                <div class="tl-dot tp1"></div>
+                <span class="tl-title">TP-1</span>
+                <span class="tl-sub" id="tlTP1Date">—</span>
+              </div>
+              <div class="tl-connector"></div>
+              <div class="tl-point">
+                <div class="tl-dot tp2"></div>
+                <span class="tl-title">TP-2</span>
+                <span class="tl-sub" id="tlTP2Date">—</span>
+              </div>
+              <div class="tl-connector dashed"></div>
+              <div class="tl-point">
+                <div class="tl-dot next"></div>
+                <span class="tl-title">Next</span>
+                <span class="tl-sub" id="tlNextDate">~90d</span>
+              </div>
+            </div>
+            <div class="tl-meta-text">
+              <span>Interval: <strong id="tlInterval">90 days</strong></span>
+              <span>Post-RT: <strong id="tlPostRT">—</strong></span>
+            </div>
+          </div>
+        
+
+          <!-- XAI PANEL SECTION -->
+          <div class="xai-container" id="xaiContainer">
+            <div class="xai-header">
+              <div class="xai-head-left">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#00f0ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <h3>Explainable AI · Clinical Co-Pilot Consultation</h3>
+              </div>
+              <span class="copilot-badge">Dual-Tier RANO 2.0 Engine</span>
+            </div>
+
+            <!-- HUMAN-LIKE CLINICAL IMPRESSION CARD -->
+            <div class="clinical-impression-card" id="clinicalImpressionCard">
+              <div class="impression-header">
+                <div class="impression-doc-badge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                  <span>Senior Neuro-Radiologist Impression (Consultative Synthesis)</span>
+                </div>
+                <span class="conf-badge-pill" id="lblImpressionStatus">Suspected Pseudo-Progression</span>
+              </div>
+              
+              <div class="impression-body" id="impressionBody">
+                <!-- Dynamically populated human-like clinical narrative -->
+              </div>
+            </div>
+
+            <!-- RISK & CONFIDENCE METRICS -->
+            <div class="xai-metrics-row">
+              <div class="gauge-box">
+                <div class="gauge-num" id="lblRiskPercent">84.2%</div>
+                <div class="gauge-lbl" id="lblRiskCategory">Progression Risk</div>
+              </div>
+              <div class="conf-details">
+                <div class="conf-line">
+                  <span>AI Confidence:</span>
+                  <strong id="lblAIConfidence">91% (Conformal)</strong>
+                </div>
+                <div class="conf-line">
+                  <span>95% Safety Interval:</span>
+                  <strong id="lblConfInterval">[75% — 93%]</strong>
+                </div>
+                <div class="conf-line">
+                  <span>Suggested Action:</span>
+                  <strong class="action-highlight" id="lblClinicalAction">2nd-Line Therapy Evaluation</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- SHAP DRIVERS LIST -->
+            <div class="shap-section">
+              <div class="shap-title">
+                <span>Quantitative Biomarker Attributions</span>
+                <span class="shap-sub-hint">(Biomarker weights from Section 5.2 TreeSHAP Suite)</span>
+              </div>
+              <div class="shap-list" id="shapList"></div>
+            </div>
+
+            <!-- COUNTERFACTUAL RECOURSE -->
+            <div class="counterfactual-box">
+              <div class="cf-badge">Therapeutic Target for Disease Stabilization (Counterfactual Recourse)</div>
+              <p id="cfBody">If enhancing tumor volume is stabilized or reduced by <strong>≥25%</strong> via re-resection or adjuvant therapy, RANO classification shifts from <span class="text-red">PD → SD</span>.</p>
+            </div>
+
+            <!-- ODRP OPTICAL HARDCOPY FILM & SMARTPHONE CAMERA BENCHMARK -->
+            <div class="odrp-box" id="odrpBenchmarkBox">
+              <div class="odrp-head">
+                <div class="odrp-title-left">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00f0ff" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <strong>Stream 2: Smartphone Camera &amp; Hardcopy Film Robustness</strong>
+                </div>
+                <span class="odrp-retention-badge">93.5% Retention Verified</span>
+              </div>
+              <div class="odrp-grid-metrics">
+                <div class="odrp-metric-item">
+                  <span class="odrp-m-lbl">1. Native DICOM / NIfTI:</span>
+                  <span class="odrp-m-val text-cyan">0.5518 Dice (100% Ref)</span>
+                </div>
+                <div class="odrp-metric-item">
+                  <span class="odrp-m-lbl">2. Raw Phone Snapshot:</span>
+                  <span class="odrp-m-val text-red">0.3785 Dice (-31.4% Loss)</span>
+                </div>
+                <div class="odrp-metric-item">
+                  <span class="odrp-m-lbl">3. Phone + ODRP Rectifier:</span>
+                  <span class="odrp-m-val text-cyan">0.5160 Dice (93.5% Retained)</span>
+                </div>
+              </div>
+              <div class="odrp-footer-note">
+                Hardcopy film sheets (multi-slice grids) captured via smartphone cameras are standardized using our ODRP Retinex illumination and glare rectification pipeline.
+              </div>
+            </div>
+
+            <div class="xai-disclaimer">
+              ⚠️ Decision-support tool only. Final clinical assessment requires review by the multidisciplinary tumor board.
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: TP2 VIEWER & EXPLAINABLE AI -->
+        <section class="panel-card viewer-card" id="panelTP2">
+          <div class="viewer-bar tp2-bar">
+            <div class="viewer-bar-left">
+              <span class="tp-pill tp2-pill">TP-2</span>
+              <span class="bar-title">Current Follow-Up</span>
+            </div>
+            <div class="viewer-bar-right">
+              <div class="mod-group">
+                <button class="mod-btn active" id="btnMod2T1c" data-panel="2" data-mod="t1c">T1c</button>
+                <button class="mod-btn" id="btnMod2Flair" data-panel="2" data-mod="flair">FLAIR</button>
+                <button class="mod-btn" id="btnMod2T1n" data-panel="2" data-mod="t1n">T1n</button>
+                <button class="mod-btn" id="btnMod2T2" data-panel="2" data-mod="t2">T2</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CLEAN CONTROL STRIP -->
+          <div class="viewer-sub-toolbar">
+            <span class="sub-date" id="lblTP2Date">— / Pending Upload</span>
+            <label class="toggle-lbl">
+              <input type="checkbox" id="chkMask2" checked>
+              <span class="toggle-text">AI Segmentation Mask</span>
+            </label>
+          </div>
+
+          <div class="viewer-screen-box" id="screenBox2" title="Click to enlarge & inspect in high-resolution">
+            <canvas id="mriCanvas2" width="480" height="480"></canvas>
+            <div class="screen-badge tp2-badge-pos">TP-2 Current</div>
+            <button class="btn-screen-inspect" id="btnInspectTP2" title="Enlarge & Inspect (Full-Screen)">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Click to Enlarge 🔍</span>
+            </button>
+          </div>
+
+          <!-- SLICE CONTROLS -->
+          <div class="slice-controls">
+            <button class="slice-btn" id="btnPrevSlice2" title="Previous slice">◄</button>
+            <div class="slice-info">
+              <span class="slice-label">Slice: <strong id="txtSliceNum2">68</strong> / <span id="txtSliceTotal2">75</span></span>
+              <input type="range" id="rngSlice2" min="45" max="75" value="68" class="clean-slider">
+            </div>
+            <button class="slice-btn" id="btnNextSlice2" title="Next slice">►</button>
+          </div>
+
+          <!-- VOLUME BREAKDOWN -->
+          <div class="vol-table">
+            <div class="vol-cell">
+              <span class="vol-name">ET Volume</span>
+              <span class="vol-number et-color" id="volET2">— mL</span>
+            </div>
+            <div class="vol-cell">
+              <span class="vol-name">Edema (FLAIR)</span>
+              <span class="vol-number edema-color" id="volEdema2">— mL</span>
+            </div>
+            <div class="vol-cell">
+              <span class="vol-name">Cavity</span>
+              <span class="vol-number cavity-color" id="volCavity2">— mL</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ================= DIAGNOSTIC FULLSCREEN INSPECTION MODAL ================= -->
+  <div class="mri-inspect-modal hidden" id="mriModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="mri-modal-backdrop" id="modalBackdrop"></div>
+    <div class="mri-modal-dialog">
+      <!-- HEADER -->
+      <div class="mri-modal-header">
+        <div class="mri-modal-header-left">
+          <span class="tp-pill tp1-pill" id="modalTpPill">TP-1</span>
+          <div class="mri-modal-title-box">
+            <h3 id="modalTitle">Diagnostic MRI Inspection (Full-Screen)</h3>
+            <span class="mri-modal-sub" id="modalMeta">PatientID_0018 · Slice 68 / 75 · T1c High-Resolution</span>
+          </div>
+        </div>
+        <div class="mri-modal-header-right">
+          <button class="btn-modal-toggle-tp" id="btnModalToggleTP" title="Switch between TP-1 and TP-2">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+            <span id="txtModalToggleTP">Compare TP-2</span>
+          </button>
+          <button class="btn-modal-close" id="btnModalClose" title="Close Inspection (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- MAIN VIEWER SCREEN IN MODAL -->
+      <div class="mri-modal-screen" id="modalScreenBox">
+        <canvas id="modalCanvas" width="480" height="480"></canvas>
+        <div class="modal-zoom-bar">
+          <button class="zoom-btn" id="btnModalZoomIn" title="Zoom In">+</button>
+          <button class="zoom-btn reset-zoom" id="btnModalZoomReset" title="Reset Zoom">100%</button>
+          <button class="zoom-btn" id="btnModalZoomOut" title="Zoom Out">−</button>
+        </div>
+        <div class="modal-corner-badge" id="modalCornerBadge">100% Scale · Drag to Pan / Scroll to Zoom</div>
+      </div>
+
+      <!-- MODAL CONTROL STRIP -->
+      <div class="mri-modal-controls">
+        <div class="modal-controls-top">
+          <div class="mod-group" id="modalModGroup">
+            <button class="mod-btn active" data-mod="t1c">T1c</button>
+            <button class="mod-btn" data-mod="flair">FLAIR</button>
+            <button class="mod-btn" data-mod="t1n">T1n</button>
+            <button class="mod-btn" data-mod="t2">T2</button>
+          </div>
+
+          <label class="toggle-lbl">
+            <input type="checkbox" id="modalChkMask" checked>
+            <span class="toggle-text">AI Segmentation Overlay</span>
+          </label>
+
+          <div class="modal-vol-summary" id="modalVolSummary">
+            <span class="et-pill">ET: <strong id="modalVolET">52.4 mL</strong></span>
+            <span class="edema-pill">Edema: <strong id="modalVolEdema">91.7 mL</strong></span>
+            <span class="cavity-pill">Cavity: <strong id="modalVolCavity">46.1 mL</strong></span>
+          </div>
+        </div>
+
+        <!-- SLICE SCRUBBER -->
+        <div class="modal-slice-bar">
+          <button class="slice-btn" id="btnModalPrevSlice" title="Previous slice">◄</button>
+          <div class="slice-info">
+            <span class="slice-label">Slice: <strong id="txtModalSliceNum">68</strong> / 75</span>
+            <input type="range" id="rngModalSlice" min="45" max="75" value="68" class="clean-slider">
+          </div>
+          <button class="slice-btn" id="btnModalNextSlice" title="Next slice">►</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS FOOTER -->
+  <footer class="statusbar">
+    <div class="status-left">
+      <span class="status-dot live"></span>
+      <span>GliomaGuard AI™ <strong>v2.0 Longitudinal</strong></span>
+      <span class="sep">|</span>
+      <span>Latency: <strong id="txtClientLatency">1.2 ms</strong></span>
+    </div>
+    <div class="status-right">
+      <span>Free Academic Prototype · Mobile &amp; PC Optimized</span>
+      <span class="sep">|</span>
+      <span>MU-Glioma Consortium</span>
+    </div>
+  </footer>
+
+  <!-- TOAST ALERTS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="spin-ring"></div>
+      <p class="spin-text" id="loadingText">Running longitudinal pipeline…</p>
+      <p class="spin-sub">Slice registration · nnU-Net segmentation · RANO 2.0 scoring · SHAP attribution</p>
+    </div>
+  </div>
+
+  <script src="app.js?v=20261014_syntax_fixed_v9"></script>
+</body>
+</html>

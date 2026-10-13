@@ -1,0 +1,202 @@
+{
+  "PatientID_0018": {
+    "id": "PatientID_0018",
+    "v1_name": "Timepoint_1",
+    "v2_name": "Timepoint_6",
+    "default_slice": 68,
+    "slice_min": 45,
+    "slice_max": 75,
+    "vols_tp1": {
+      "et": 52.4,
+      "edema": 91.7,
+      "cavity": 46.1,
+      "netc": 8.3
+    },
+    "vols_tp2": {
+      "et": 65.8,
+      "edema": 108.3,
+      "cavity": 42.5,
+      "netc": 11.2
+    },
+    "delta_et": 25.6,
+    "delta_edema": 18.1,
+    "delta_cavity": -7.8,
+    "rano_class": "PD",
+    "rano_full": "Progressive Disease (PD)",
+    "pseudo_progression": true,
+    "days_since_rt": 65
+  },
+  "PatientID_0003": {
+    "id": "PatientID_0003",
+    "v1_name": "Timepoint_1",
+    "v2_name": "Timepoint_2",
+    "default_slice": 55,
+    "slice_min": 40,
+    "slice_max": 70,
+    "vols_tp1": {
+      "et": 33.8,
+      "edema": 44.3,
+      "cavity": 0.0,
+      "netc": 6.5
+    },
+    "vols_tp2": {
+      "et": 37.2,
+      "edema": 45.8,
+      "cavity": 0.0,
+      "netc": 2.8
+    },
+    "delta_et": 10.1,
+    "delta_edema": 3.4,
+    "delta_cavity": 0.0,
+    "rano_class": "SD",
+    "rano_full": "Stable Disease (SD)"
+  },
+  "PatientID_0005": {
+    "id": "PatientID_0005",
+    "v1_name": "Timepoint_3",
+    "v2_name": "Timepoint_4",
+    "default_slice": 83,
+    "slice_min": 68,
+    "slice_max": 98,
+    "vols_tp1": {
+      "et": 42.8,
+      "edema": 93.7,
+      "cavity": 0.0,
+      "netc": 2.9
+    },
+    "vols_tp2": {
+      "et": 27.6,
+      "edema": 102.2,
+      "cavity": 0.0,
+      "netc": 10.5
+    },
+    "delta_et": -35.5,
+    "delta_edema": 9.1,
+    "delta_cavity": 0.0,
+    "rano_class": "PR",
+    "rano_full": "Partial Response (PR)"
+  },
+  "UCSF_100001": {
+    "id": "UCSF_100001",
+    "external_id": "100001",
+    "cohort": "UCSF-ALPTDG (External Benchmark Cohort)",
+    "v1_name": "Timepoint_1 (Baseline Surveillance)",
+    "v2_name": "Timepoint_2 (Follow-Up)",
+    "default_slice": 81,
+    "slice_min": 66,
+    "slice_max": 96,
+    "folder": "data/patients/UCSF_100001",
+    "surgeryDate": "2025-06-10",
+    "radioEndDate": "2025-08-15",
+    "grade": "grade4",
+    "mgmt": "methylated",
+    "steroids": "no",
+    "vols_tp1": {
+      "et": 0.85,
+      "edema": 21.18,
+      "cavity": 28.45,
+      "netc": 0.0
+    },
+    "vols_tp2": {
+      "et": 0.3,
+      "edema": 18.07,
+      "cavity": 29.95,
+      "netc": 0.0
+    },
+    "delta_et": -64.7,
+    "delta_edema": -14.7,
+    "delta_cavity": 5.3,
+    "rano_class": "PR",
+    "rano_full": "Partial Response (PR, -64.3% Regression)",
+    "pseudo_progression": false,
+    "days_since_rt": 158,
+    "odrp_camera_metrics": {
+      "native_dice": 0.5518,
+      "raw_photo_dice": 0.3785,
+      "odrp_rectified_dice": 0.516,
+      "retention_rate": "93.5%"
+    }
+  },
+  "UCSF_100005": {
+    "id": "UCSF_100005",
+    "external_id": "100005",
+    "cohort": "UCSF-ALPTDG (External Benchmark Cohort)",
+    "v1_name": "Timepoint_1 (Baseline Surveillance)",
+    "v2_name": "Timepoint_2 (Follow-Up)",
+    "default_slice": 67,
+    "slice_min": 52,
+    "slice_max": 82,
+    "folder": "data/patients/UCSF_100005",
+    "surgeryDate": "2025-04-20",
+    "radioEndDate": "2025-06-30",
+    "grade": "grade3",
+    "mgmt": "methylated",
+    "steroids": "no",
+    "vols_tp1": {
+      "et": 2.56,
+      "edema": 9.35,
+      "cavity": 14.39,
+      "netc": 0.0
+    },
+    "vols_tp2": {
+      "et": 2.71,
+      "edema": 9.4,
+      "cavity": 18.75,
+      "netc": 0.0
+    },
+    "delta_et": 5.9,
+    "delta_edema": 0.5,
+    "delta_cavity": 30.3,
+    "rano_class": "SD",
+    "rano_full": "Stable Disease (SD, +6.2% Surveillance Stability)",
+    "pseudo_progression": false,
+    "days_since_rt": 168,
+    "odrp_camera_metrics": {
+      "native_dice": 0.5518,
+      "raw_photo_dice": 0.3785,
+      "odrp_rectified_dice": 0.516,
+      "retention_rate": "93.5%"
+    }
+  },
+  "UCSF_100026": {
+    "id": "UCSF_100026",
+    "external_id": "100026",
+    "cohort": "UCSF-ALPTDG (External Benchmark Cohort)",
+    "v1_name": "Timepoint_1 (Baseline Surveillance)",
+    "v2_name": "Timepoint_2 (Follow-Up)",
+    "default_slice": 92,
+    "slice_min": 77,
+    "slice_max": 107,
+    "folder": "data/patients/UCSF_100026",
+    "surgeryDate": "2025-09-05",
+    "radioEndDate": "2025-11-12",
+    "grade": "grade4",
+    "mgmt": "unmethylated",
+    "steroids": "no",
+    "vols_tp1": {
+      "et": 5.74,
+      "edema": 12.51,
+      "cavity": 5.38,
+      "netc": 0.0
+    },
+    "vols_tp2": {
+      "et": 8.55,
+      "edema": 29.23,
+      "cavity": 0.2,
+      "netc": 0.81
+    },
+    "delta_et": 49.0,
+    "delta_edema": 133.7,
+    "delta_cavity": -96.3,
+    "rano_class": "PD",
+    "rano_full": "Progressive Disease (PD, +48.9% Nodular Recurrence)",
+    "pseudo_progression": true,
+    "days_since_rt": 59,
+    "odrp_camera_metrics": {
+      "native_dice": 0.5518,
+      "raw_photo_dice": 0.3785,
+      "odrp_rectified_dice": 0.516,
+      "retention_rate": "93.5%"
+    }
+  }
+}

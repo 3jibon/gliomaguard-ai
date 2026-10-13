@@ -1,0 +1,61 @@
+{
+  "patient_id": "PatientID_0018",
+  "cohort": "MU-Glioma-Post (Longitudinal Cohort)",
+  "timepoint": "Timepoint 6 (90-day Postoperative Follow-Up)",
+  "slice_range": [
+    45,
+    75
+  ],
+  "default_slice": 68,
+  "total_slices": 31,
+  "modalities": [
+    "t1c",
+    "flair",
+    "t1n",
+    "t2"
+  ],
+  "modality_labels": {
+    "t1c": "T1-Contrast (T1c)",
+    "flair": "T2-FLAIR",
+    "t1n": "T1-Native (T1n)",
+    "t2": "T2-Weighted (T2w)"
+  },
+  "rano_recurrence_score": 0.961,
+  "rano_risk_category": "High-Risk Recurrence (Progression)",
+  "conformal_safety": {
+    "confidence_level": "95%",
+    "alpha": 0.05,
+    "prediction_interval": [
+      0.892,
+      0.985
+    ],
+    "safety_badge": "CERTIFIED 95% COVERAGE"
+  },
+  "novelty_5_xai": {
+    "primary_biomarker": "Delta Sphericity (Cavity Remodeling)",
+    "shap_score": "+0.34 log-odds",
+    "target_slice": 68,
+    "focal_point": {
+      "x": 34,
+      "y": 90
+    },
+    "bounding_box": {
+      "x_min": 15,
+      "x_max": 65,
+      "y_min": 18,
+      "y_max": 128
+    },
+    "clinical_note": "Collapsed cavity wall showing nodular contrast enhancement driving recurrence risk."
+  },
+  "counterfactual_recourse": {
+    "stabilization_target": "Delta Sphericity >= +0.05",
+    "post_intervention_risk": 0.448,
+    "status": "Safe Stable Remission"
+  },
+  "odrp_camera_metrics": {
+    "native_dice": 0.5518,
+    "raw_photo_dice": 0.3785,
+    "odrp_rectified_dice": 0.516,
+    "retention_rate": "93.5%"
+  }
+}
