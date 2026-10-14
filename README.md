@@ -29,3 +29,8 @@ This directory is fully self-contained with model weights (`best.pt`, 5.88 MB) a
    - Link your GitHub repo to a new Web Service on Render or Railway.
    - Set the root directory to `webapp`.
    - Build using the included `Dockerfile`.
+
+
+
+
+access link: https://gliomaguard-ai.onrender.com
