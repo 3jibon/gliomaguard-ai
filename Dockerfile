@@ -1,3 +1,4 @@
+# GliomaGuard Cloud Research Viewer v2.0.1 (Header overlap fixed)
 FROM python:3.10-slim
 
 WORKDIR /app

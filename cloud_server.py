@@ -166,7 +166,7 @@ class GliomaGuardCloudHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({
                 "status": "online",
                 "system": "GliomaGuard Research Viewer",
-                "version": "2.0-Audited-Viewer",
+                "version": "2.0.1-Audited-Viewer-HeaderFixed",
                 "mode": "hosted_research_viewer",
                 "inference_engine": "Precomputed Audited Research Pipeline",
                 "fresh_inference_status": "disabled_on_cloud_host",
