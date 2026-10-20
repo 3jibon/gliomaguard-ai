@@ -12,6 +12,12 @@
 </head>
 <body data-mobile-tab="upload" data-mri-view="split">
 
+  <!-- HOSTED VIEWER AUDIT BANNER -->
+  <div class="hosted-viewer-banner" id="hostedViewerBanner">
+    <span class="banner-dot"></span>
+    <span><strong>Hosted research viewer</strong> — precomputed automated results; fresh segmentation inference is not available on this service.</span>
+  </div>
+
   <!-- TOP NAVBAR -->
   <header class="navbar" id="mainNavbar">
     <div class="nav-left">
@@ -50,6 +56,11 @@
     </div>
 
     <div class="nav-right">
+      <div class="mode-switch-group" id="navModeSwitch">
+        <button type="button" class="mode-btn active" id="btnModeRef">Mode 1: Reference Viewer</button>
+        <button type="button" class="mode-btn" id="btnModeAuto">Mode 2: Audited Automated Results</button>
+      </div>
+      <div class="provenance-badge ref" id="provenanceBadgeNav">PROVENANCE: reference/demo measurement</div>
       <div class="patient-pill">
         <span class="patient-id" id="navPatientId">No Patient</span>
         <span class="visit-badge" id="navVisitBadge">—</span>
@@ -239,42 +250,43 @@
           <div class="patient-cohort-bar">
             <div class="cohort-label">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00f0ff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Clinical Cohorts (Internal MU-Glioma &amp; External UCSF-ALPTDG Benchmark):</span>
+              <span>Audited Clinical Cohorts (UCSF-ALPTDG Benchmark &amp; MU-Glioma Post-Op):</span>
             </div>
             <div class="cohort-select-wrap">
               <select id="selectCohortPatient" class="clean-cohort-select">
-                <optgroup label="🧪 External UCSF Validation Cohort (Section 7 Benchmark)">
-                  <option value="UCSF_100001">UCSF-100001 · Partial Response (PR, -64.7%) · Tumor Regression</option>
-                  <option value="UCSF_100005">UCSF-100005 · Stable Disease (SD, +5.9%) · Stable Surveillance</option>
-                  <option value="UCSF_100026">De-identified Pair · Reference Volumes (+48.9%) · Growth Endpoint</option>
+                <optgroup label="🧪 Audited Benchmark Cohorts (Verified Provenance)">
+                  <option value="UCSF_100026" selected>UCSF-100026 · External Benchmark Pair (Endpoint: POSITIVE · +48.9% Growth)</option>
+                  <option value="PatientID_0018">PatientID_0018 · Internal Validation Pair (Endpoint: POSITIVE · Expansion)</option>
+                  <option value="PatientID_0022">PatientID_0022 · Internal Validation Pair (Endpoint: NEGATIVE · -97.5% Regression)</option>
                 </optgroup>
-                <optgroup label="🏥 Internal MU-Glioma Development Cohort">
-                  <option value="PatientID_0018">PatientID_0018 · Progressive Disease (PD, +25.6%) · ⚠️ Pseudo-Progression Rule</option>
-                  <option value="PatientID_0003">PatientID_0003 · Stable Disease (SD, +10.1%) · Surveillance Stability</option>
-                  <option value="PatientID_0005">PatientID_0005 · Partial Response (PR, -35.5%) · Favorable Tumor Regression</option>
+                <optgroup label="📋 Additional Audited Reference Cases">
+                  <option value="UCSF_100001">UCSF-100001 · External Surveillance (-64.7% Regression)</option>
+                  <option value="UCSF_100005">UCSF-100005 · External Surveillance (+5.9% Stable)</option>
+                  <option value="PatientID_0003">PatientID_0003 · Internal Surveillance (+10.1% Stable)</option>
+                  <option value="PatientID_0005">PatientID_0005 · Internal Surveillance (-35.5% Regression)</option>
                 </optgroup>
               </select>
               <button class="btn-cohort-load" id="btnLoadCohortPatient">
-                <span>Load &amp; Calculate Patient</span>
+                <span>Load Active Case</span>
               </button>
             </div>
           </div>
 
           <div class="action-buttons-group">
-            <button class="btn-primary" id="btnAnalyze" disabled>
+            <button class="btn-primary" id="btnAnalyze">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <span>Run Longitudinal Analysis</span>
+              <span>View Surveillance Cockpit</span>
             </button>
-            <button class="btn-secondary" id="btnLoadDemoData">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-              <span>Quick Load (UCSF-100001)</span>
+            <button class="btn-primary" id="btnRunFrozenPipeline" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Execute Frozen 4-Model Runner (GPU)</span>
             </button>
-            <button class="btn-secondary" id="btnLoadCameraDemo" title="Test with real smartphone camera photos of hardcopy MRI film">
+            <button class="btn-secondary" id="btnLoadCameraDemo" title="Test with smartphone photo demo">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ff3366" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              <span>📷 Test Smartphone Camera Photo</span>
+              <span>📷 Smartphone Photo Demo</span>
             </button>
           </div>
-          <div class="action-status" id="analyzeHint">Upload both follow-up scans or select a real clinical cohort patient</div>
+          <div class="action-status" id="analyzeHint">Select an audited cohort patient or execute frozen pipeline</div>
         </div>
 
       </div>
@@ -293,31 +305,36 @@
         <div class="cockpit-patient-switch">
           <span class="cockpit-switch-lbl">Active Case:</span>
           <select id="cockpitSelectPatient" class="clean-cohort-select-sm">
-            <optgroup label="🧪 Validation Cohorts">
-              <option value="UCSF_100026" selected>De-identified Pair · Reference Volumes (+48.9%) · Growth Endpoint</option>
-              <option value="UCSF_100001">UCSF-100001 · Favorable Regression (-64.7%)</option>
-              <option value="UCSF_100005">UCSF-100005 · Surveillance Stability (+5.9%)</option>
+            <optgroup label="🧪 Audited Benchmark Cohorts">
+              <option value="UCSF_100026" selected>UCSF-100026 (Endpoint: POSITIVE · +48.9%)</option>
+              <option value="PatientID_0018">PatientID_0018 (Endpoint: POSITIVE · Expansion)</option>
+              <option value="PatientID_0022">PatientID_0022 (Endpoint: NEGATIVE · -97.5%)</option>
             </optgroup>
-            <optgroup label="🏥 Internal Research Cohort">
-              <option value="PatientID_0018">PatientID_0018 · Growth (+25.6%) · ⚠️ Post-RT Interval</option>
-              <option value="PatientID_0003">PatientID_0003 · Stability (+10.1%)</option>
-              <option value="PatientID_0005">PatientID_0005 · Regression (-35.5%)</option>
+            <optgroup label="📋 Additional Reference Cases">
+              <option value="UCSF_100001">UCSF-100001 (PR, -64.7%)</option>
+              <option value="UCSF_100005">UCSF-100005 (SD, +5.9%)</option>
+              <option value="PatientID_0003">PatientID_0003 (SD, +10.1%)</option>
+              <option value="PatientID_0005">PatientID_0005 (PR, -35.5%)</option>
             </optgroup>
           </select>
         </div>
+
+        <div class="mode-switch-group">
+          <button type="button" class="mode-btn active" id="btnCockpitModeRef">Mode 1: Reference Viewer</button>
+          <button type="button" class="mode-btn" id="btnCockpitModeAuto">Mode 2: Audited Automated Results</button>
+          <button type="button" class="mode-btn" id="btnCockpitRunFresh" style="background: rgba(139, 92, 246, 0.2); border: 1px solid #8b5cf6; color: #c4b5fd; font-weight: 600;" title="Hosted research viewer — precomputed automated results; fresh segmentation inference is not available on this service.">⚡ Run GPU Pipeline (Local)</button>
+        </div>
+        <div class="provenance-badge ref" id="provenanceBadgeCockpit">PROVENANCE: reference/demo measurement</div>
+        <span class="job-id-badge" id="cockpitJobIdBadge" style="display:none; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; background:rgba(139,92,246,0.25); border:1px solid #8b5cf6; color:#c4b5fd; margin-left:8px;"></span>
 
         <div class="global-viewer-tools">
           <label class="toggle-lbl">
             <input type="checkbox" id="chkSyncSlices" checked>
             <span class="toggle-text">Sync Slices</span>
           </label>
-          <button class="btn-subtraction" id="btnToggleSubtraction">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
-            <span>Δ Subtraction Map</span>
-          </button>
-          <button class="btn-subtraction" id="btnToggleXAI" title="Display genuine model gradient attribution heatmap">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            <span>⚡ XAI Heatmap</span>
+          <button class="btn-subtraction" id="btnExportReport" title="Export Audited Surveillance JSON Report">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00f0ff" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export Report</span>
           </button>
         </div>
 
@@ -353,8 +370,12 @@
           <div class="viewer-sub-toolbar">
             <span class="sub-date" id="lblTP1Date">Timepoint 1</span>
             <label class="toggle-lbl">
-              <input type="checkbox" id="chkMask1" checked>
-              <span class="toggle-text">Reference Segmentation Overlay</span>
+              <input type="checkbox" id="chkMaskRef1" checked>
+              <span class="toggle-text">Reference Mask</span>
+            </label>
+            <label class="toggle-lbl">
+              <input type="checkbox" id="chkMaskAuto1" checked>
+              <span class="toggle-text">Automated Mask</span>
             </label>
           </div>
 
@@ -398,20 +419,27 @@
         <section class="panel-card metrics-card" id="panelRANO">
           
           <!-- GROWTH ENDPOINT ASSESSMENT HERO -->
-          <div class="rano-hero-card" id="ranoResultCard">
-            <div class="card-caption">Longitudinal Growth Assessment (Reference Volumetrics)</div>
-            <div class="rano-banner endpoint-positive" id="ranoBadgeLarge">
-              <div class="rano-code" id="ranoCategory">ENDPOINT+</div>
-              <div class="rano-desc" id="ranoFullName">Predefined ET-Growth Endpoint (+48.9% · Reference Mask Evaluation)</div>
-            </div>
+          <div class="endpoint-banner pos" id="endpointBanner">
+            <div class="endpoint-title" id="endpointTitle">IMAGING-DEFINED GROWTH ENDPOINT: POSITIVE</div>
+            <div class="endpoint-desc" id="endpointSubtitle">Paper Criteria: ΔET ≥ 0.5 mL AND ΔET / max(ET_baseline, 0.5 mL) ≥ 25%</div>
+          </div>
 
-            <!-- PSEUDO-PROGRESSION ALERT -->
-            <div class="pseudo-box hidden" id="pseudoWarning">
-              <div class="pseudo-head">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f39c12" stroke-width="2.4"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <span>Pseudo-Progression Rule Triggered</span>
-              </div>
-              <p id="pseudoWarningDetail">TP-2 scan is within 12 weeks of radiotherapy completion. Enhancement increase may be radiation necrosis rather than true progressive glioma. Repeat scan in 4–8 weeks recommended.</p>
+          <!-- DUAL-CRITERIA & CONTINUOUS MARGIN CHECKLIST -->
+          <div class="criteria-checklist">
+            <div class="criteria-item">
+              <span class="crit-name">1. Absolute Growth (ΔET ≥ 0.5 mL)</span>
+              <span class="crit-val" id="critAbsVal">+2.81 mL</span>
+              <span class="crit-badge pass" id="critAbsBadge">CRITERION MET</span>
+            </div>
+            <div class="criteria-item">
+              <span class="crit-name">2. Relative Growth (ΔET / max(V1, 0.5) ≥ 25%)</span>
+              <span class="crit-val" id="critRelVal">+48.9%</span>
+              <span class="crit-badge pass" id="critRelBadge">CRITERION MET</span>
+            </div>
+            <div class="criteria-item">
+              <span class="crit-name">3. Continuous Margin (Paper Eq. 3)</span>
+              <span class="crit-val" id="critMarginVal">+1.9565</span>
+              <span class="crit-badge pass" id="critMarginBadge">GROWTH (&gt; 1.0)</span>
             </div>
           </div>
 
@@ -419,54 +447,83 @@
           <div class="delta-block">
             <div class="block-title">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00f0ff" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-              Reference Volumetric Δ Changes (TP1 → TP2)
+              Physical Volumetric Δ Changes (Voxel Geometry Derived)
             </div>
 
             <!-- ET DELTA -->
             <div class="delta-row" id="deltaETCard">
               <div class="delta-row-top">
                 <span class="delta-row-label">Enhancing Tumor (ET)</span>
-                <span class="delta-badge up" id="deltaETBadge">+21.8%</span>
+                <span class="delta-badge up" id="deltaETBadge">+48.9%</span>
               </div>
               <div class="delta-values">
-                <span id="deltaETFrom">52.4 mL</span>
+                <span id="deltaETFrom">5.74 mL</span>
                 <span class="delta-arrow">→</span>
-                <strong id="deltaETTo">63.8 mL</strong>
+                <strong id="deltaETTo">8.55 mL</strong>
               </div>
               <div class="delta-meter">
                 <div class="delta-meter-fill up" id="deltaETBar" style="width: 65%;"></div>
               </div>
             </div>
 
-            <!-- EDEMA DELTA -->
+            <!-- SNFH DELTA -->
             <div class="delta-row" id="deltaEdemaCard">
               <div class="delta-row-top">
-                <span class="delta-row-label">Surrounding non-enhancing FLAIR hyperintensity (SNFH)</span>
+                <span class="delta-row-label">Surrounding Non-Enhancing FLAIR (SNFH)</span>
                 <span class="delta-badge up" id="deltaEdemaBadge">+133.8%</span>
               </div>
               <div class="delta-values">
-                <span id="deltaEdemaFrom">12.5 mL</span>
+                <span id="deltaEdemaFrom">12.51 mL</span>
                 <span class="delta-arrow">→</span>
-                <strong id="deltaEdemaTo">29.2 mL</strong>
+                <strong id="deltaEdemaTo">29.24 mL</strong>
               </div>
               <div class="delta-meter">
                 <div class="delta-meter-fill up" id="deltaEdemaBar" style="width: 75%;"></div>
               </div>
             </div>
 
-            <!-- CAVITY DELTA -->
+            <!-- RC DELTA -->
             <div class="delta-row" id="deltaCavityCard">
               <div class="delta-row-top">
                 <span class="delta-row-label">Resection Cavity (RC)</span>
-                <span class="delta-badge down" id="deltaCavityBadge">-7.8%</span>
+                <span class="delta-badge down" id="deltaCavityBadge">-96.3%</span>
               </div>
               <div class="delta-values">
-                <span id="deltaCavityFrom">46.1 mL</span>
+                <span id="deltaCavityFrom">5.38 mL</span>
                 <span class="delta-arrow">→</span>
-                <strong id="deltaCavityTo">42.5 mL</strong>
+                <strong id="deltaCavityTo">0.20 mL</strong>
               </div>
               <div class="delta-meter">
                 <div class="delta-meter-fill down" id="deltaCavityBar" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIGHTGBM RISK STRATIFICATION CARD -->
+          <div class="lgbm-triage-card">
+            <div class="lgbm-header">
+              <span>Dual LightGBM Risk Triage Suite</span>
+              <span class="copilot-badge">Frozen Checkpoints</span>
+            </div>
+            <div class="lgbm-models-grid">
+              <div class="lgbm-model-box">
+                <div class="lgbm-model-name">Baseline Model (8 Feat)</div>
+                <div class="lgbm-prob" id="lgbmProbBaseline">0.782</div>
+                <div class="lgbm-threshold">Threshold τ = 0.42</div>
+                <div class="lgbm-decision pos" id="lgbmDecBaseline">POSITIVE</div>
+              </div>
+              <div class="lgbm-model-box">
+                <div class="lgbm-model-name">Extended Task B (15 Feat)</div>
+                <div class="lgbm-prob" id="lgbmProbExtended">0.855</div>
+                <div class="lgbm-threshold">Threshold τ = 0.35</div>
+                <div class="lgbm-decision pos" id="lgbmDecExtended">POSITIVE</div>
+              </div>
+            </div>
+            <div class="lgbm-limitation-note">
+              <strong>Evaluation Limitation:</strong> Models are reference-trained.
+              <div style="margin-top: 4px; line-height: 1.4;">
+                <span style="color: #38bdf8;">Reference uncertainty:</span> <em>Reference-input calibration; patient-level coverage not established.</em><br>
+                <span style="color: #f43f5e;">Automated uncertainty:</span> <em>Experimental; automated-input coverage not validated.</em> (Cutoff <em>q̂* = 0.8341</em>, α = 0.05).
               </div>
             </div>
           </div>
@@ -523,44 +580,44 @@
             <div class="xai-header">
               <div class="xai-head-left">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#00f0ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                <h3>Explainable AI · Clinical Co-Pilot Consultation</h3>
+                <h3>Imaging Biomarker Change Analysis</h3>
               </div>
-              <span class="copilot-badge">Dual-Tier RANO 2.0 Engine</span>
+              <span class="copilot-badge">Quantitative Assessment</span>
             </div>
 
-            <!-- HUMAN-LIKE CLINICAL IMPRESSION CARD -->
+            <!-- QUANTITATIVE IMAGING OBSERVATION CARD -->
             <div class="clinical-impression-card" id="clinicalImpressionCard">
               <div class="impression-header">
                 <div class="impression-doc-badge">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
-                  <span>Senior Neuro-Radiologist Impression (Consultative Synthesis)</span>
+                  <span>Quantitative Longitudinal Observation</span>
                 </div>
-                <span class="conf-badge-pill" id="lblImpressionStatus">Suspected Pseudo-Progression</span>
+                <span class="conf-badge-pill" id="lblImpressionStatus">Growth Positive</span>
               </div>
               
               <div class="impression-body" id="impressionBody">
-                <!-- Dynamically populated human-like clinical narrative -->
+                <!-- Dynamically populated quantitative imaging narrative -->
               </div>
             </div>
 
             <!-- RISK & CONFIDENCE METRICS -->
             <div class="xai-metrics-row">
               <div class="gauge-box">
-                <div class="gauge-num" id="lblRiskPercent">84.2%</div>
-                <div class="gauge-lbl" id="lblRiskCategory">Progression Risk</div>
+                <div class="gauge-num" id="lblRiskPercent">85.5%</div>
+                <div class="gauge-lbl" id="lblRiskCategory">Model Probability</div>
               </div>
               <div class="conf-details">
                 <div class="conf-line">
-                  <span>AI Confidence:</span>
-                  <strong id="lblAIConfidence">91% (Conformal)</strong>
+                  <span>Conformal Bounds:</span>
+                  <strong id="lblAIConfidence">Reference-Input Audited Only</strong>
                 </div>
                 <div class="conf-line">
-                  <span>95% Safety Interval:</span>
-                  <strong id="lblConfInterval">[75% — 93%]</strong>
+                  <span>Automated Input Coverage:</span>
+                  <strong id="lblConfInterval">Uncalibrated / No Guarantee</strong>
                 </div>
                 <div class="conf-line">
-                  <span>Suggested Action:</span>
-                  <strong class="action-highlight" id="lblClinicalAction">2nd-Line Therapy Evaluation</strong>
+                  <span>Growth Status:</span>
+                  <strong class="action-highlight" id="lblClinicalAction">Threshold Exceeded</strong>
                 </div>
               </div>
             </div>
@@ -569,15 +626,15 @@
             <div class="shap-section">
               <div class="shap-title">
                 <span>Quantitative Biomarker Attributions</span>
-                <span class="shap-sub-hint">(Biomarker weights from Section 5.2 TreeSHAP Suite)</span>
+                <span class="shap-sub-hint">(Volumetric features from audited LightGBM models)</span>
               </div>
               <div class="shap-list" id="shapList"></div>
             </div>
 
             <!-- COUNTERFACTUAL RECOURSE -->
             <div class="counterfactual-box">
-              <div class="cf-badge">Therapeutic Target for Disease Stabilization (Counterfactual Recourse)</div>
-              <p id="cfBody">If enhancing tumor volume is stabilized or reduced by <strong>≥25%</strong> via re-resection or adjuvant therapy, RANO classification shifts from <span class="text-red">PD → SD</span>.</p>
+              <div class="cf-badge">Endpoint Margin Recourse Condition</div>
+              <p id="cfBody">Under predefined endpoint criteria, growth status shifts to negative if absolute ET expansion is maintained &lt; 0.5 mL or relative expansion is maintained &lt; 25%.</p>
             </div>
 
             <!-- ODRP OPTICAL HARDCOPY FILM & SMARTPHONE CAMERA BENCHMARK -->
@@ -635,8 +692,12 @@
           <div class="viewer-sub-toolbar">
             <span class="sub-date" id="lblTP2Date">Timepoint 2</span>
             <label class="toggle-lbl">
-              <input type="checkbox" id="chkMask2" checked>
-              <span class="toggle-text">Reference Segmentation Overlay</span>
+              <input type="checkbox" id="chkMaskRef2" checked>
+              <span class="toggle-text">Reference Mask</span>
+            </label>
+            <label class="toggle-lbl">
+              <input type="checkbox" id="chkMaskAuto2" checked>
+              <span class="toggle-text">Automated Mask</span>
             </label>
           </div>
 
@@ -754,14 +815,12 @@
   <footer class="statusbar">
     <div class="status-left">
       <span class="status-dot live"></span>
-      <span>GliomaGuard <strong>v2.0 Research Prototype</strong></span>
+      <span>GliomaGuard <strong>v2.0 Hosted Research Viewer</strong></span>
       <span class="sep">|</span>
-      <span>Software Workflow Demonstration · Academic &amp; Research Use Only</span>
+      <span>Precomputed Audited Results · Academic &amp; Research Use Only</span>
     </div>
     <div class="status-right">
-      <span>Free Academic Prototype · Mobile &amp; PC Optimized</span>
-      <span class="sep">|</span>
-      <span>MU-Glioma Consortium</span>
+      <span>Datasets: <a href="https://doi.org/10.7937/7K9K-3C83" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">MU-Glioma-Post (TCIA CC BY 4.0)</a> &amp; <a href="https://doi.org/10.1148/ryai.230182" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">UCSF-ALPTDG (UCSF Ci2 DUA)</a></span>
     </div>
   </footer>
 

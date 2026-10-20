@@ -1,0 +1,24 @@
+{
+  "Task_Name": "Task B: Contemporaneous Surrounding Non-Enhancing Dynamics",
+  "Feature_Count": 15,
+  "Features": [
+    "gap",
+    "et_base",
+    "snfh_base",
+    "rc_base",
+    "netc_base",
+    "compaction_proxy_base",
+    "ratio_et_edema_base",
+    "ratio_et_cavity_base",
+    "delta_snfh",
+    "rel_snfh",
+    "vel_snfh",
+    "delta_rc",
+    "vel_rc",
+    "delta_netc",
+    "vel_netc"
+  ],
+  "Target_Endpoint": "Predefined Volumetric Change Endpoint: delta_ET >= 0.5 mL and rel_ET >= 25% (strictly expert-derived)",
+  "Permitted_Information": "Baseline compartment volumes at t1 + nominal inter-scan interval gap + follow-up deltas in surrounding edema (SNFH), cavity (RC), and necrosis (NETC). Total tumor delta and follow-up ET are strictly excluded to prevent algebraic leakage.",
+  "Clinical_Semantics": "Task B measures contemporaneous imaging-change association between non-enhancing tissue shifts and enhancing tumor reactivation; it is NOT a future clinical prognostic forecasting model."
+}

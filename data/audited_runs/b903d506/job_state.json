@@ -1,0 +1,153 @@
+{
+  "job_id": "b903d506",
+  "status": "COMPLETED",
+  "progress_percent": 100,
+  "message": "Frozen pipeline execution complete (87.25s)",
+  "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+  "tp1_files": {
+    "t1n": "packaged/t1n.nii.gz",
+    "t1c": "packaged/t1c.nii.gz",
+    "t2w": "packaged/t2w.nii.gz",
+    "flair": "packaged/flair.nii.gz"
+  },
+  "tp2_files": {
+    "t1n": "packaged/t1n.nii.gz",
+    "t1c": "packaged/t1c.nii.gz",
+    "t2w": "packaged/t2w.nii.gz",
+    "flair": "packaged/flair.nii.gz"
+  },
+  "gap": 1.0,
+  "result": {
+    "job_id": "b903d506",
+    "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+    "total_execution_seconds": 87.25,
+    "endpoint_assessment": {
+      "delta_et_ml": -50.734,
+      "relative_change_percent": -97.55412836980348,
+      "denominator_floor_ml": 52.006,
+      "condition_absolute_met": false,
+      "condition_relative_met": false,
+      "endpoint_status": "NEGATIVE",
+      "is_growth_positive": false,
+      "continuous_growth_margin": -101.468,
+      "rule_specification": "delta_ET >= 0.5 mL AND delta_ET / max(baseline_ET, 0.5 mL) >= 25.0%"
+    },
+    "classifiers": {
+      "status": "success",
+      "baseline": {
+        "features_used": 8,
+        "probability": 0.6068,
+        "prob_growth": 0.6068,
+        "operating_threshold": 0.42,
+        "threshold": 0.42,
+        "prediction": 1,
+        "prediction_positive": true,
+        "classification": "GROWTH_PREDICTED"
+      },
+      "baseline_model": {
+        "features_used": 8,
+        "probability": 0.6068,
+        "prob_growth": 0.6068,
+        "operating_threshold": 0.42,
+        "threshold": 0.42,
+        "prediction": 1,
+        "prediction_positive": true,
+        "classification": "GROWTH_PREDICTED"
+      },
+      "extended_task_b": {
+        "features_used": 15,
+        "probability": 0.1669,
+        "prob_growth": 0.1669,
+        "operating_threshold": 0.35,
+        "threshold": 0.35,
+        "prediction": 0,
+        "prediction_positive": false,
+        "classification": "NON_GROWTH",
+        "conformal_calibration": {
+          "alpha": 0.05,
+          "target_nominal_coverage": 0.95,
+          "conformal_cutoff_q_hat": 0.8341396203515523,
+          "conformal_cutoff_rounded": 0.8341,
+          "threshold_lower": 0.1658603796484477,
+          "threshold_upper": 0.8341396203515523,
+          "prediction_set": [
+            "NON_GROWTH",
+            "GROWTH_PREDICTED"
+          ],
+          "prediction_set_type": "AMBIGUOUS_FLAGGED",
+          "status": "EXPERIMENTAL_AUTOMATED_INPUT_COVERAGE_NOT_VALIDATED",
+          "label_bn": "\u09aa\u09b0\u09c0\u0995\u09cd\u09b7\u09be\u09ae\u09c2\u09b2\u0995, coverage \u09af\u09be\u099a\u09be\u0987 \u09b9\u09df\u09a8\u09bf",
+          "validation_empirical_coverage": 0.9744,
+          "validation_single_label_efficiency": 0.4487,
+          "validation_ambiguous_rate": 0.5513,
+          "limitation": "Automated input conformal triage: Experimental research indicator only; coverage is not mathematically guaranteed (nominal 95% coverage calibrated on expert manual annotations only under exchangeability)."
+        }
+      },
+      "limitation_statement": "Automated input conformal triage: Experimental research indicator only; coverage is not mathematically guaranteed (nominal 95% coverage calibrated on expert manual annotations only under exchangeability)."
+    },
+    "features_task_b": {
+      "gap": 1.0,
+      "et_base": 52.006,
+      "snfh_base": 165.823,
+      "rc_base": 2.487,
+      "netc_base": 6.5680000000000005,
+      "compaction_proxy_base": 0.8073850633701981,
+      "ratio_et_edema_base": 0.3136235624732395,
+      "ratio_et_cavity_base": 20.91113791716928,
+      "delta_snfh": -85.74900000000001,
+      "rel_snfh": -0.5171116190154563,
+      "vel_snfh": -85.74900000000001,
+      "delta_rc": -0.9670000000000001,
+      "vel_rc": -0.9670000000000001,
+      "delta_netc": -6.507000000000001,
+      "vel_netc": -6.507000000000001
+    },
+    "baseline_tp1": {
+      "volumes_ml": {
+        "netc": 6.5680000000000005,
+        "snfh": 165.823,
+        "et": 52.006,
+        "rc": 2.487
+      },
+      "voxel_counts": {
+        "netc": 6568,
+        "snfh": 165823,
+        "et": 52006,
+        "rc": 2487
+      },
+      "inference_seconds": 42.29,
+      "fused_sha256": "43183dd38c309a9ca4f773380e1f7a2602600b1f52bd1d20bed9f51e9aa24868"
+    },
+    "followup_tp2": {
+      "volumes_ml": {
+        "netc": 0.061,
+        "snfh": 80.074,
+        "et": 1.272,
+        "rc": 1.52
+      },
+      "voxel_counts": {
+        "netc": 61,
+        "snfh": 80074,
+        "et": 1272,
+        "rc": 1520
+      },
+      "inference_seconds": 42.31,
+      "fused_sha256": "19401db6fd6e6abb527c13dd0261fa97ecb92a42413f83deeb2fad0c04c57165"
+    },
+    "system_info": {
+      "device": "cuda:0",
+      "gpu_name": "NVIDIA GeForce RTX 2050",
+      "pytorch_version": "2.11.0+cu128"
+    }
+  },
+  "error": null,
+  "created_at": 1760000000.0,
+  "total_execution_seconds": 87.25,
+  "case_id": "PatientID_0022",
+  "pair": "Timepoint_2 -> Timepoint_3",
+  "slice_range": [
+    40,
+    70
+  ],
+  "default_slice": 55
+}

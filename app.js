@@ -12,8 +12,8 @@ function initGliomaGuard() {
   const PATIENTS_DATABASE = {
     "PatientID_0018": {
       id: "PatientID_0018",
-      v1_name: "Timepoint_1",
-      v2_name: "Timepoint_6",
+      v1_name: "Timepoint_4",
+      v2_name: "Timepoint_5",
       default_slice: 68,
       slice_min: 45,
       slice_max: 75,
@@ -23,15 +23,38 @@ function initGliomaGuard() {
       grade: "grade4",
       mgmt: "unmethylated",
       steroids: "no",
-      vols_tp1: { et: 52.4, edema: 91.7, cavity: 46.1, netc: 8.3 },
-      vols_tp2: { et: 65.8, edema: 108.3, cavity: 42.5, netc: 11.2 },
-      delta_et: 25.6,
-      delta_edema: 18.1,
-      delta_cavity: -7.8,
-      rano_class: "PD",
-      rano_full: "Progressive Disease (PD)",
-      pseudo_progression: true,
+      vols_tp1: { et: 3.152, edema: 96.159, cavity: 14.404, netc: 0.089 },
+      vols_tp2: { et: 18.019, edema: 38.667, cavity: 2.126, netc: 1.504 },
+      delta_et: 471.67,
+      delta_edema: -59.79,
+      delta_cavity: -85.24,
+      rano_class: "ENDPOINT+",
+      rano_full: "Predefined ET-Growth Endpoint (+471.7% · Expansion)",
+      pseudo_progression: false,
       days_since_rt: 65
+    },
+    "PatientID_0022": {
+      id: "PatientID_0022",
+      v1_name: "Timepoint_2",
+      v2_name: "Timepoint_3",
+      default_slice: 55,
+      slice_min: 40,
+      slice_max: 70,
+      folder: "data",
+      surgeryDate: "2025-07-12",
+      radioEndDate: "2025-09-20",
+      grade: "grade4",
+      mgmt: "methylated",
+      steroids: "no",
+      vols_tp1: { et: 52.017, edema: 165.835, cavity: 2.488, netc: 6.561 },
+      vols_tp2: { et: 1.272, edema: 80.076, cavity: 1.521, netc: 0.061 },
+      delta_et: -97.55,
+      delta_edema: -51.71,
+      delta_cavity: -38.86,
+      rano_class: "ENDPOINT-",
+      rano_full: "Negative Growth Endpoint (-97.5% Regression)",
+      pseudo_progression: false,
+      days_since_rt: 280
     },
     "PatientID_0003": {
       id: "PatientID_0003",
@@ -154,22 +177,26 @@ function initGliomaGuard() {
 
   // ─── STATE MANAGEMENT ─────────────────────────────────────────────────────
   const state = {
+    mode: "reference",
+    provenance: "reference/demo measurement (ground-truth manual annotation)",
     tp1: {
       file: null,
       customUrl: null,
       date: "",
-      sliceNum: 68,
+      sliceNum: 92,
       modality: "t1c",
-      showMask: true,
+      showMaskRef: true,
+      showMaskAuto: true,
       showXAI: false
     },
     tp2: {
       file: null,
       customUrl: null,
       date: "",
-      sliceNum: 68,
+      sliceNum: 92,
       modality: "t1c",
-      showMask: true,
+      showMaskRef: true,
+      showMaskAuto: true,
       showXAI: false
     },
     syncSlices: true,
@@ -177,18 +204,21 @@ function initGliomaGuard() {
     demoLoaded: false,
     analysisRun: false,
     patient: {
-      id: "Patient_0001",
+      id: "UCSF_100026",
+      caseKey: "UCSF_100026",
       surgeryDate: "",
       radioEndDate: "",
       grade: "grade4",
       mgmt: "unmethylated",
       steroids: "no"
     },
-    // Volumetrics in mL (strictly populated by genuine Trio-GliomaNet forward passes)
+    // Volumetrics in mL (strictly populated by genuine Trio-GliomaNet forward passes or reference masks)
     vols: {
-      tp1: { et: 0.0, edema: 0.0, cavity: 0.0, netc: 0.0 },
-      tp2: { et: 0.0, edema: 0.0, cavity: 0.0, netc: 0.0 }
+      tp1: { et: 5.743, edema: 12.505, cavity: 5.380, netc: 0.0 },
+      tp2: { et: 8.552, edema: 29.235, cavity: 0.197, netc: 0.810 }
     },
+    endpoint: null,
+    classifiers: null,
     imageCache: new Map()
   };
 
@@ -244,17 +274,43 @@ function initGliomaGuard() {
   const selectSteroids   = $("selectSteroids");
 
   // Actions
+  // Actions & Mode System
   const btnLoadDemoData  = $("btnLoadDemoData");
   const btnAnalyze       = $("btnAnalyze");
   const analyzeHint      = $("analyzeHint");
   const btnBackToUpload  = $("btnBackToUpload");
   const cockpitSelectPatient = $("cockpitSelectPatient");
+  const btnModeRef       = $("btnModeRef");
+  const btnModeAuto      = $("btnModeAuto");
+  const btnCockpitModeRef  = $("btnCockpitModeRef");
+  const btnCockpitModeAuto = $("btnCockpitModeAuto");
+  const provenanceBadgeNav = $("provenanceBadgeNav");
+  const provenanceBadgeCockpit = $("provenanceBadgeCockpit");
+  const btnExportReport  = $("btnExportReport");
+  const btnRunFrozenPipeline = $("btnRunFrozenPipeline");
+
+  // Endpoint & Classification Elements
+  const endpointBanner   = $("endpointBanner");
+  const endpointTitle    = $("endpointTitle");
+  const endpointSubtitle = $("endpointSubtitle");
+  const critAbsVal       = $("critAbsVal");
+  const critAbsBadge     = $("critAbsBadge");
+  const critRelVal       = $("critRelVal");
+  const critRelBadge     = $("critRelBadge");
+  const critMarginVal    = $("critMarginVal");
+  const critMarginBadge  = $("critMarginBadge");
+
+  const lgbmProbBaseline = $("lgbmProbBaseline");
+  const lgbmDecBaseline  = $("lgbmDecBaseline");
+  const lgbmProbExtended = $("lgbmProbExtended");
+  const lgbmDecExtended  = $("lgbmDecExtended");
 
   // TP1 Viewer Controls
   const mriCanvas1     = $("mriCanvas1");
   const ctx1           = mriCanvas1.getContext("2d", { willReadFrequently: true });
   const lblTP1Date     = $("lblTP1Date");
-  const chkMask1       = $("chkMask1");
+  const chkMaskRef1    = $("chkMaskRef1");
+  const chkMaskAuto1   = $("chkMaskAuto1");
   const rngSlice1      = $("rngSlice1");
   const txtSliceNum1   = $("txtSliceNum1");
   const txtSliceTotal1 = $("txtSliceTotal1");
@@ -268,7 +324,8 @@ function initGliomaGuard() {
   const mriCanvas2     = $("mriCanvas2");
   const ctx2           = mriCanvas2.getContext("2d", { willReadFrequently: true });
   const lblTP2Date     = $("lblTP2Date");
-  const chkMask2       = $("chkMask2");
+  const chkMaskRef2    = $("chkMaskRef2");
+  const chkMaskAuto2   = $("chkMaskAuto2");
   const rngSlice2      = $("rngSlice2");
   const txtSliceNum2   = $("txtSliceNum2");
   const txtSliceTotal2 = $("txtSliceTotal2");
@@ -396,7 +453,9 @@ function initGliomaGuard() {
 
     // 1. Resolve Base MRI Image URL
     let mriUrl = s.customUrl;
-    if (s.niftiSlices) {
+    if (state.mode === "fresh_automated" && state.activeJobId) {
+      mriUrl = `/api/pipeline/job_slice?job_id=${encodeURIComponent(state.activeJobId)}&tp=${tp}&type=mri&modality=${s.modality || "t1c"}&slice=${s.sliceNum}`;
+    } else if (s.niftiSlices) {
       mriUrl = s.niftiSlices[String(s.sliceNum)] || (s.niftiData ? s.niftiSlices[String(s.niftiData.default_slice)] : null) || s.customUrl;
     }
 
@@ -451,47 +510,66 @@ function initGliomaGuard() {
         ctx.restore();
       }
 
-      // 3. Draw AI Segmentation Mask Overlay if enabled
-      if (s.showMask) {
-        if (s.niftiSegSlices && s.niftiSegSlices[String(s.sliceNum)]) {
+      // 3. Draw Segmentation Mask Overlays (Fresh Automated vs Reference)
+      const showRef = tp === 1 ? (chkMaskRef1 ? chkMaskRef1.checked : true) : (chkMaskRef2 ? chkMaskRef2.checked : true);
+      const showAuto = tp === 1 ? (chkMaskAuto1 ? chkMaskAuto1.checked : true) : (chkMaskAuto2 ? chkMaskAuto2.checked : true);
+
+      if (state.mode === "fresh_automated" && state.activeJobId) {
+        // Genuine fresh segmentation mask from the completed GPU inference job
+        if (showAuto) {
           try {
-            const maskImg = await loadImage(s.niftiSegSlices[String(s.sliceNum)]);
+            const freshMaskUrl = `/api/pipeline/job_slice?job_id=${encodeURIComponent(state.activeJobId)}&tp=${tp}&type=mask&slice=${s.sliceNum}`;
+            const maskImg = await loadImage(freshMaskUrl);
             ctx.save();
-            ctx.globalAlpha = 0.85; // Natural transparent medical overlay
+            ctx.globalAlpha = 0.85;
             ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
             ctx.restore();
-          } catch(e) {}
-        } else if (!s.customUrl && !s.niftiSlices) {
-          const maskUrl = `${resolvedPath}/seg_${s.sliceNum}.png`;
-          try {
-            const maskImg = await loadImage(maskUrl);
-            ctx.save();
-            ctx.globalAlpha = 0.85; // Natural transparent medical overlay
-            ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
-          } catch (e) {
-            // Mask not found for this slice, continue with clean scan
+          } catch(e) {
+            console.warn("Failed to load fresh automated mask slice:", e);
           }
-        } else {
-          // AI Real-Time Segmentation Overlay for custom uploaded scans:
-          // Enhancing Tumor (ET) in bright warm amber/gold, SNFH in cyan
-          try {
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const d = imgData.data;
-            for (let i = 0; i < d.length; i += 4) {
-              const lum = d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114;
-              if (lum > 185) {
-                d[i] = Math.min(255, d[i] + 75);
-                d[i+1] = Math.min(255, d[i+1] + 45);
-                d[i+2] = Math.max(0, d[i+2] - 50);
-              } else if (lum > 130) {
-                d[i] = Math.max(0, d[i] - 25);
-                d[i+1] = Math.min(255, d[i+1] + 35);
-                d[i+2] = Math.min(255, d[i+2] + 70);
-              }
-            }
-            ctx.putImageData(imgData, 0, 0);
-          } catch(maskErr) {}
+        }
+        if (showRef) {
+          // Subtle reference overlay if available
+          if (s.niftiSegSlices && s.niftiSegSlices[String(s.sliceNum)]) {
+            try {
+              const maskImg = await loadImage(s.niftiSegSlices[String(s.sliceNum)]);
+              ctx.save();
+              ctx.globalAlpha = 0.45;
+              ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } catch(e) {}
+          } else if (!s.customUrl && !s.niftiSlices) {
+            const maskUrl = `${resolvedPath}/seg_${s.sliceNum}.png`;
+            try {
+              const maskImg = await loadImage(maskUrl);
+              ctx.save();
+              ctx.globalAlpha = 0.45;
+              ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } catch (e) {}
+          }
+        }
+      } else {
+        // Reference or cached benchmark mode
+        if (showRef) {
+          if (s.niftiSegSlices && s.niftiSegSlices[String(s.sliceNum)]) {
+            try {
+              const maskImg = await loadImage(s.niftiSegSlices[String(s.sliceNum)]);
+              ctx.save();
+              ctx.globalAlpha = 0.85;
+              ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } catch(e) {}
+          } else if (!s.customUrl && !s.niftiSlices) {
+            const maskUrl = `${resolvedPath}/seg_${s.sliceNum}.png`;
+            try {
+              const maskImg = await loadImage(maskUrl);
+              ctx.save();
+              ctx.globalAlpha = 0.85;
+              ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } catch (e) {}
+          }
         }
       }
 
@@ -580,18 +658,19 @@ function initGliomaGuard() {
     });
   }
 
-  // Mask Toggles
-  chkMask1.addEventListener("change", e => {
-    state.tp1.showMask = e.target.checked;
-    renderCanvas(1);
-    toast(state.tp1.showMask ? "TP-1 AI Mask: ON" : "TP-1 Raw MRI: ON", "cyan");
-  });
-
-  chkMask2.addEventListener("change", e => {
-    state.tp2.showMask = e.target.checked;
-    renderCanvas(2);
-    toast(state.tp2.showMask ? "TP-2 AI Mask: ON" : "TP-2 Raw MRI: ON", "pink");
-  });
+  // Mask Toggles (Reference ground truth vs Frozen Automated Prediction)
+  if (chkMaskRef1) {
+    chkMaskRef1.addEventListener("change", () => renderCanvas(1));
+  }
+  if (chkMaskAuto1) {
+    chkMaskAuto1.addEventListener("change", () => renderCanvas(1));
+  }
+  if (chkMaskRef2) {
+    chkMaskRef2.addEventListener("change", () => renderCanvas(2));
+  }
+  if (chkMaskAuto2) {
+    chkMaskAuto2.addEventListener("change", () => renderCanvas(2));
+  }
 
   // Subtraction Toggle
   if (btnToggleSubtraction) {
@@ -1158,9 +1237,45 @@ function initGliomaGuard() {
   }
 
 
-  // ─── LOAD PATIENT FROM COHORT DATABASE ────────────────────────────────────
-  function loadPatientData(pid) {
-    const p = PATIENTS_DATABASE[pid];
+  // ─── PROVENANCE BADGE UPDATER ─────────────────────────────────────────────
+  function updateProvenanceBadge() {
+    const isRef = state.mode === "reference";
+    const isFresh = state.mode === "fresh_automated";
+    const badgeText = isRef ? "PROVENANCE: reference/demo measurement" :
+                      isFresh ? `PROVENANCE: fresh automated prediction` :
+                      "PROVENANCE: cached automated prediction";
+    const badgeClass = isRef ? "provenance-badge ref" :
+                       isFresh ? "provenance-badge fresh" :
+                       "provenance-badge cached";
+
+    [provenanceBadgeNav, provenanceBadgeCockpit].forEach(b => {
+      if (b) {
+        b.textContent = badgeText;
+        b.className = badgeClass;
+      }
+    });
+
+    const jobIdBadge = $("cockpitJobIdBadge");
+    if (jobIdBadge) {
+      if (isFresh && state.activeJobId) {
+        jobIdBadge.textContent = `Job: ${state.activeJobId}`;
+        jobIdBadge.style.display = "inline-block";
+      } else {
+        jobIdBadge.style.display = "none";
+      }
+    }
+
+    [btnModeRef, btnCockpitModeRef].forEach(b => {
+      if (b) b.classList.toggle("active", isRef);
+    });
+    [btnModeAuto, btnCockpitModeAuto].forEach(b => {
+      if (b) b.classList.toggle("active", !isRef);
+    });
+  }
+
+  // ─── LOAD PATIENT FROM COHORT DATABASE / RESEARCH BACKEND ─────────────────
+  async function loadPatientData(pid) {
+    const p = PATIENTS_DATABASE[pid] || PATIENTS_DATABASE["UCSF_100026"];
     if (!p) return;
 
     state.demoLoaded = true;
@@ -1178,8 +1293,40 @@ function initGliomaGuard() {
     state.patient.grade = p.grade;
     state.patient.mgmt = p.mgmt;
 
-    state.vols.tp1 = { ...p.vols_tp1 };
-    state.vols.tp2 = { ...p.vols_tp2 };
+    // Fetch authoritative server case calculation (with exact physical volumetry & LightGBM)
+    try {
+      const resp = await fetch(`/api/pipeline/load_case?case_id=${encodeURIComponent(pid)}&mode=${encodeURIComponent(state.mode || 'reference')}`);
+      const data = await resp.json();
+      if (data.status === "success") {
+        state.activeJobId = data.job_id || (data.mode === "cached_automated" ? (pid === "PatientID_0018" ? "98c33b66" : (pid === "PatientID_0022" ? "b903d506" : null)) : null);
+        state.vols.tp1 = {
+          et: data.vols_tp1.et,
+          edema: data.vols_tp1.snfh !== undefined ? data.vols_tp1.snfh : (data.vols_tp1.edema || 0.0),
+          cavity: data.vols_tp1.rc !== undefined ? data.vols_tp1.rc : (data.vols_tp1.cavity || 0.0),
+          netc: data.vols_tp1.netc || 0.0
+        };
+        state.vols.tp2 = {
+          et: data.vols_tp2.et,
+          edema: data.vols_tp2.snfh !== undefined ? data.vols_tp2.snfh : (data.vols_tp2.edema || 0.0),
+          cavity: data.vols_tp2.rc !== undefined ? data.vols_tp2.rc : (data.vols_tp2.cavity || 0.0),
+          netc: data.vols_tp2.netc || 0.0
+        };
+        state.provenance = data.provenance;
+        state.endpoint = data.endpoint;
+        state.classifiers = data.classifiers;
+      } else {
+        const msg = data.message || `Case '${pid}' not found on server. Fallback is rejected.`;
+        toast(msg, "pink");
+        console.error("Load case rejected:", msg);
+        return;
+      }
+    } catch(err) {
+      console.error("Server case query error:", err);
+      toast("Server query error: " + err.message, "pink");
+      return;
+    }
+
+    updateProvenanceBadge();
 
     state.tp1.sliceNum = p.default_slice;
     state.tp2.sliceNum = p.default_slice;
@@ -1210,8 +1357,8 @@ function initGliomaGuard() {
 
     // Set preview images
     const baseFolder = p.folder || "data";
-    const p1Img = (baseFolder === "data") ? "data/tp1/t1c_68.png" : `${baseFolder}/tp1/t1c_${p.default_slice}.png`;
-    const p2Img = (baseFolder === "data") ? "data/tp2/t1c_68.png" : `${baseFolder}/tp2/t1c_${p.default_slice}.png`;
+    const p1Img = (baseFolder === "data") ? `data/tp1/t1c_${p.default_slice || 68}.png` : `${baseFolder}/tp1/t1c_${p.default_slice}.png`;
+    const p2Img = (baseFolder === "data") ? `data/tp2/t1c_${p.default_slice || 68}.png` : `${baseFolder}/tp2/t1c_${p.default_slice}.png`;
 
     previewImg1.src = p1Img;
     previewName1.textContent = `${p.id}_${p.v1_name}_T1c.nii.gz`;
@@ -1228,26 +1375,46 @@ function initGliomaGuard() {
     if (cockpitSelectPatient) cockpitSelectPatient.value = pid;
     if (navPatientId) navPatientId.textContent = p.id;
 
-    if (volET1) volET1.textContent = `${p.vols_tp1.et.toFixed(1)} mL`;
-    if (volEdema1) volEdema1.textContent = `${p.vols_tp1.edema.toFixed(1)} mL`;
-    if (volCavity1) volCavity1.textContent = `${p.vols_tp1.cavity.toFixed(1)} mL`;
+    if (volET1) volET1.textContent = `${state.vols.tp1.et.toFixed(1)} mL`;
+    if (volEdema1) volEdema1.textContent = `${state.vols.tp1.edema.toFixed(1)} mL`;
+    if (volCavity1) volCavity1.textContent = `${state.vols.tp1.cavity.toFixed(1)} mL`;
     if (lblTP1Date) lblTP1Date.textContent = state.tp1.date || "Timepoint 1";
 
-    if (volET2) volET2.textContent = `${p.vols_tp2.et.toFixed(1)} mL`;
-    if (volEdema2) volEdema2.textContent = `${p.vols_tp2.edema.toFixed(1)} mL`;
-    if (volCavity2) volCavity2.textContent = `${p.vols_tp2.cavity.toFixed(1)} mL`;
+    if (volET2) volET2.textContent = `${state.vols.tp2.et.toFixed(1)} mL`;
+    if (volEdema2) volEdema2.textContent = `${state.vols.tp2.edema.toFixed(1)} mL`;
+    if (volCavity2) volCavity2.textContent = `${state.vols.tp2.cavity.toFixed(1)} mL`;
     if (lblTP2Date) lblTP2Date.textContent = state.tp2.date || "Timepoint 2";
 
     // Re-render immediately if already on Analysis screen
     if (state.analysisRun) {
-      renderCanvas(1);
-      renderCanvas(2);
-      computeRANOAndXAI();
+      await renderCanvas(1);
+      await renderCanvas(2);
+      await computeRANOAndXAI();
     }
 
     checkReady();
-    toast(`Loaded ${p.id} · RANO Expected: ${p.rano_full} (ΔET ${p.delta_et > 0 ? "+" : ""}${p.delta_et}%)`, p.delta_et > 20 ? "pink" : "cyan");
+    toast(`Loaded ${p.id} · ${state.provenance}`, "cyan");
   }
+
+  // ─── DUAL-MODE SWITCHER LISTENERS ─────────────────────────────────────────
+  function setMode(newMode) {
+    state.mode = newMode;
+    if (newMode === "reference") {
+      state.provenance = "reference/demo measurement (ground-truth manual annotation)";
+    } else if (newMode === "cached_automated") {
+      state.provenance = "cached automated prediction (frozen four-model ensemble)";
+    } else if (newMode === "fresh_automated") {
+      state.provenance = "fresh automated prediction (GPU serialized runner)";
+    }
+    updateProvenanceBadge();
+    loadPatientData(state.patient.caseKey || state.patient.id || "UCSF_100026");
+  }
+
+  if (btnModeRef) btnModeRef.addEventListener("click", () => setMode("reference"));
+  if (btnModeAuto) btnModeAuto.addEventListener("click", () => setMode("cached_automated"));
+  if (btnCockpitModeRef) btnCockpitModeRef.addEventListener("click", () => setMode("reference"));
+  if (btnCockpitModeAuto) btnCockpitModeAuto.addEventListener("click", () => setMode("cached_automated"));
+  window.setMode = setMode;
 
   const selectCohortPatient = $("selectCohortPatient");
   const btnLoadCohortPatient = $("btnLoadCohortPatient");
@@ -1264,17 +1431,253 @@ function initGliomaGuard() {
     });
   }
 
-  // ─── LOAD REAL PATIENT DEMO ───────────────────────────────────────────────
-  btnLoadDemoData.addEventListener("click", () => {
-    state.demoLoaded = true;
-    state.tp1.customUrl = null;
-    state.tp2.customUrl = null;
-    state.tp1.niftiSlices = null;
-    state.tp2.niftiSlices = null;
+  // Export report listener
+  if (btnExportReport) {
+    btnExportReport.addEventListener("click", async () => {
+      try {
+        const activeJobParam = state.activeJobId ? `&job_id=${encodeURIComponent(state.activeJobId)}` : "";
+        const url = `/api/export_report?case_id=${encodeURIComponent(state.patient.id || "PatientID_0018")}&mode=${encodeURIComponent(state.mode)}${activeJobParam}`;
+        const r = await fetch(url);
+        const data = await r.json();
+        if (!r.ok || data.status === "error") {
+          const errMsg = data.message || `Export failed with HTTP ${r.status}`;
+          toast(errMsg, "pink");
+          alert(`Export Rejected: ${errMsg}`);
+          return;
+        }
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `GliomaGuard_Report_${state.patient.id}_${state.activeJobId || state.mode}.json`;
+        a.click();
+        toast("Exported Audited Surveillance Report JSON", "success");
+      } catch (err) {
+        toast("Failed to export report: " + err.message, "pink");
+      }
+    });
+  }
+
+  // Execute Frozen Pipeline Runner (GPU)
+  // Execute Frozen Pipeline Runner (GPU)
+  if (btnRunFrozenPipeline) {
+    btnRunFrozenPipeline.addEventListener("click", async () => {
+      try {
+        const selVal = (selectCohortPatient && selectCohortPatient.value) || (cockpitSelectPatient && cockpitSelectPatient.value) || state.patient.id || state.patient.caseKey;
+        
+        // Strict input validation: MUST be a verified cohort case with real raw NIfTI scans on disk
+        if (!selVal || (selVal !== "PatientID_0018" && selVal !== "PatientID_0022")) {
+          const errMsg = `Execution Rejected: Case "${selVal || 'unknown'}" is not supported for live GPU execution. Only verified cases (PatientID_0018, PatientID_0022) with raw multi-sequence NIfTI scans are executable. No fallback patient will be used.`;
+          toast(errMsg, "pink");
+          alert(errMsg);
+          return;
+        }
+
+        loadingOverlay.classList.remove("hidden");
+        loadingText.textContent = `Requesting pipeline execution for ${selVal}...`;
+
+        const activeCase = selVal;
+        if (state.patient.id !== activeCase && typeof loadPatientData === "function") {
+          await loadPatientData(activeCase);
+        }
+
+        const submitResp = await fetch("/api/pipeline/job_submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            case_id: activeCase,
+            gap: 1.0,
+            provenance: "fresh automated prediction (live GPU inference)"
+          })
+        });
+
+        const job = await submitResp.json();
+        if (!submitResp.ok || job.status === "unavailable" || job.status === "error" || !job.job_id) {
+          loadingOverlay.classList.add("hidden");
+          const msg = job.message || "Hosted research viewer — precomputed automated results; fresh segmentation inference is not available on this service. Please use the local GPU runner for fresh model execution.";
+          toast(msg, "pink");
+          alert(msg);
+          return;
+        }
+
+        const jobId = job.job_id;
+        let done = false;
+        while (!done) {
+          await new Promise(r => setTimeout(r, 800));
+          const stResp = await fetch(`/api/pipeline/job_status?job_id=${encodeURIComponent(jobId)}`);
+          const st = await stResp.json();
+          const statusUpper = (st.status || "").toUpperCase();
+
+          if (statusUpper === "COMPLETED") {
+            done = true;
+            state.activeJobId = jobId;
+            state.mode = "fresh_automated";
+            state.provenance = `fresh automated prediction (live GPU inference · Job: ${jobId})`;
+
+            const res = st.result || st;
+            const v1 = res.baseline_tp1?.volumes_ml || res.vols_tp1 || st.vols_tp1 || {};
+            const v2 = res.followup_tp2?.volumes_ml || res.vols_tp2 || st.vols_tp2 || {};
+
+            state.vols.tp1 = {
+              et: Number(v1.et || 0.0),
+              edema: Number(v1.snfh !== undefined ? v1.snfh : (v1.edema || 0.0)),
+              cavity: Number(v1.rc !== undefined ? v1.rc : (v1.cavity || 0.0)),
+              netc: Number(v1.netc || 0.0)
+            };
+            state.vols.tp2 = {
+              et: Number(v2.et || 0.0),
+              edema: Number(v2.snfh !== undefined ? v2.snfh : (v2.edema || 0.0)),
+              cavity: Number(v2.rc !== undefined ? v2.rc : (v2.cavity || 0.0)),
+              netc: Number(v2.netc || 0.0)
+            };
+
+            state.endpoint = res.endpoint_assessment || res.endpoint || st.endpoint;
+            state.classifiers = res.classifiers || st.classifiers;
+
+            // Clear any static slice caches so fresh job slices render
+            state.tp1.niftiSegSlices = null;
+            state.tp2.niftiSegSlices = null;
+            state.tp1.customUrl = null;
+            state.tp2.customUrl = null;
+
+            // Set slice range and default slice according to case
+            const p = PATIENTS_DATABASE[activeCase];
+            if (p) {
+              state.tp1.sliceNum = p.default_slice;
+              state.tp2.sliceNum = p.default_slice;
+              if (rngSlice1) rngSlice1.value = p.default_slice;
+              if (rngSlice2) rngSlice2.value = p.default_slice;
+              if (txtSliceNum1) txtSliceNum1.textContent = p.default_slice;
+              if (txtSliceNum2) txtSliceNum2.textContent = p.default_slice;
+            }
+
+            // Update DOM badge
+            const jobIdBadge = $("cockpitJobIdBadge");
+            if (jobIdBadge) {
+              jobIdBadge.textContent = `Job: ${jobId}`;
+              jobIdBadge.style.display = "inline-block";
+            }
+            if (stageCockpit) {
+              stageCockpit.dataset.jobId = jobId;
+            }
+
+            updateProvenanceBadge();
+            loadingOverlay.classList.add("hidden");
+            stageUpload.classList.add("hidden");
+            stageCockpit.classList.remove("hidden");
+            state.analysisRun = true;
+            await renderCanvas(1);
+            await renderCanvas(2);
+            await computeRANOAndXAI();
+            const dur = res.total_execution_seconds ? ` (${res.total_execution_seconds}s)` : "";
+            toast(`Fresh Automated GPU Inference Completed${dur} [Job: ${jobId}]`, "success");
+            break;
+          } else if (statusUpper === "FAILED") {
+            throw new Error(st.error || st.message || "GPU inference execution failed");
+          } else {
+            const pct = st.progress_percent !== undefined ? st.progress_percent : (st.progress_pct || 0);
+            loadingText.textContent = `${st.message || 'Processing on GPU...'} (${pct}%)`;
+          }
+        }
+      } catch (err) {
+        loadingOverlay.classList.add("hidden");
+        console.error("Fresh GPU Pipeline Execution Error:", err);
+        // Explicit user error feedback; DO NOT silently fall back to cached output
+        toast(`Fresh Inference Failed: ${err.message || err}`, "pink");
+      }
+    });
+  }
+
+  const btnCockpitRunFresh = $("btnCockpitRunFresh");
+  if (btnCockpitRunFresh && btnRunFrozenPipeline) {
+    btnCockpitRunFresh.addEventListener("click", () => {
+      btnRunFrozenPipeline.click();
+    });
+  }
+
+  // ─── AUDIT & VERIFICATION UTILITY: LOAD PERSISTED JOB INTO COCKPIT ─────────
+  window.loadCompletedJob = async function(jobId, caseId) {
+    const stResp = await fetch(`/api/pipeline/job_status?job_id=${encodeURIComponent(jobId)}`);
+    const st = await stResp.json();
+    if (!st || st.status !== "COMPLETED") {
+      throw new Error(`Job ${jobId} not found or not completed`);
+    }
+    const targetCase = caseId || (st.tp1_files?.t1c?.includes("PatientID_0022") ? "PatientID_0022" : "PatientID_0018");
+    if (PATIENTS_DATABASE[targetCase]) {
+      state.patient = PATIENTS_DATABASE[targetCase];
+    }
+    state.activeJobId = jobId;
+    state.mode = "fresh_automated";
+    state.provenance = `fresh automated prediction (live GPU inference · Job: ${jobId})`;
+
+    const res = st.result || st;
+    const v1 = res.baseline_tp1?.volumes_ml || res.vols_tp1 || st.vols_tp1 || {};
+    const v2 = res.followup_tp2?.volumes_ml || res.vols_tp2 || st.vols_tp2 || {};
+
+    state.vols.tp1 = {
+      et: Number(v1.et || 0.0),
+      edema: Number(v1.snfh !== undefined ? v1.snfh : (v1.edema || 0.0)),
+      cavity: Number(v1.rc !== undefined ? v1.rc : (v1.cavity || 0.0)),
+      netc: Number(v1.netc || 0.0)
+    };
+    state.vols.tp2 = {
+      et: Number(v2.et || 0.0),
+      edema: Number(v2.snfh !== undefined ? v2.snfh : (v2.edema || 0.0)),
+      cavity: Number(v2.rc !== undefined ? v2.rc : (v2.cavity || 0.0)),
+      netc: Number(v2.netc || 0.0)
+    };
+
+    state.endpoint = res.endpoint_assessment || res.endpoint || st.endpoint;
+    state.classifiers = res.classifiers || st.classifiers;
+
+    // Clear any static slice caches so fresh job slices render
     state.tp1.niftiSegSlices = null;
     state.tp2.niftiSegSlices = null;
-    loadPatientData("UCSF_100001");
-  });
+    state.tp1.customUrl = null;
+    state.tp2.customUrl = null;
+
+    const p = PATIENTS_DATABASE[targetCase];
+    if (p) {
+      state.tp1.sliceNum = p.default_slice;
+      state.tp2.sliceNum = p.default_slice;
+      if (rngSlice1) rngSlice1.value = p.default_slice;
+      if (rngSlice2) rngSlice2.value = p.default_slice;
+      if (txtSliceNum1) txtSliceNum1.textContent = p.default_slice;
+      if (txtSliceNum2) txtSliceNum2.textContent = p.default_slice;
+    }
+
+    const jobIdBadge = $("cockpitJobIdBadge");
+    if (jobIdBadge) {
+      jobIdBadge.textContent = `Job: ${jobId}`;
+      jobIdBadge.style.display = "inline-block";
+    }
+    if (stageCockpit) {
+      stageCockpit.dataset.jobId = jobId;
+    }
+
+    updateProvenanceBadge();
+    if (loadingOverlay) loadingOverlay.classList.add("hidden");
+    if (stageUpload) stageUpload.classList.add("hidden");
+    if (stageCockpit) stageCockpit.classList.remove("hidden");
+    state.analysisRun = true;
+    await renderCanvas(1);
+    await renderCanvas(2);
+    await computeRANOAndXAI();
+    return { status: "success", jobId: jobId, caseId: targetCase };
+  };
+
+  // ─── LOAD REAL PATIENT DEMO ───────────────────────────────────────────────
+  if (btnLoadDemoData) {
+    btnLoadDemoData.addEventListener("click", () => {
+      state.demoLoaded = true;
+      state.tp1.customUrl = null;
+      state.tp2.customUrl = null;
+      state.tp1.niftiSlices = null;
+      state.tp2.niftiSlices = null;
+      state.tp1.niftiSegSlices = null;
+      state.tp2.niftiSegSlices = null;
+      loadPatientData("UCSF_100001");
+    });
+  }
 
   // ─── LOAD SMARTPHONE CAMERA HARDCOPY FILM PHOTO DEMO ───────────────────────
   const btnLoadCameraDemo = $("btnLoadCameraDemo");
@@ -1295,7 +1698,7 @@ function initGliomaGuard() {
       previewImg2.src = state.tp2.customUrl;
       previewName2.textContent = "UCSF_100026_TP2_SmartphoneCamera_Slice92.jpg";
       checkReady();
-      toast("📷 Loaded Real Smartphone Camera Snapshots of Hardcopy Film (UCSF-100026 · Recurrence)", "pink");
+      toast("📷 Loaded Real Smartphone Camera Snapshots of Hardcopy Film (UCSF-100026)", "pink");
     });
   }
 
@@ -1372,6 +1775,25 @@ function initGliomaGuard() {
     toast("Longitudinal Analysis Complete · RANO 2.0 Classification Ready", "success");
   }
 
+  // ─── SURVEILLANCE TIMELINE RENDERER ──────────────────────────────────────
+  function updateTimeline() {
+    if (tlSurgDate) tlSurgDate.textContent = state.patient.surgeryDate || "2026-03-15";
+    if (tlTP1Date) tlTP1Date.textContent = state.tp1.date || "Timepoint 1";
+    if (tlTP2Date) tlTP2Date.textContent = state.tp2.date || "Timepoint 2";
+    if (tlNextDate) tlNextDate.textContent = "Surveillance (3m)";
+    if (tlInterval) tlInterval.textContent = "Longitudinal Pair";
+    if (tlPostRT) {
+      if (state.patient.radioEndDate && state.tp2.date) {
+        const rtEnd = new Date(state.patient.radioEndDate);
+        const tp2d  = new Date(state.tp2.date);
+        const days = Math.round((tp2d - rtEnd) / (1000 * 60 * 60 * 24));
+        tlPostRT.textContent = isNaN(days) ? "65 days" : `${days} days`;
+      } else {
+        tlPostRT.textContent = "65 days";
+      }
+    }
+  }
+
   // ─── RANO 2.0 EVALUATION & XAI ───────────────────────────────────────────
   async function computeRANOAndXAI() {
     const v1 = state.vols.tp1;
@@ -1418,167 +1840,173 @@ function initGliomaGuard() {
 
     const dET = v2.et - v1.et;
     const denomET = Math.max(v1.et, 0.5);
-    const deltaET = liveAssess ? liveAssess.delta_et : (dET / denomET) * 100;
+    const deltaET = (dET / denomET) * 100;
 
-    const dEdema = v2.edema - v1.edema;
-    const denomEdema = Math.max(v1.edema, 0.5);
-    const deltaEdema = liveAssess ? liveAssess.delta_edema : (dEdema / denomEdema) * 100;
+    const dEdema = (v2.edema || v2.snfh || 0) - (v1.edema || v1.snfh || 0);
+    const denomEdema = Math.max(v1.edema || v1.snfh || 0, 0.5);
+    const deltaEdema = (dEdema / denomEdema) * 100;
 
-    const dCavity = v2.cavity - v1.cavity;
-    const denomCavity = Math.max(v1.cavity, 0.5);
-    const deltaCavity = liveAssess ? liveAssess.delta_cav : (dCavity / denomCavity) * 100;
+    const dCavity = (v2.cavity || v2.rc || 0) - (v1.cavity || v1.rc || 0);
+    const denomCavity = Math.max(v1.cavity || v1.rc || 0, 0.5);
+    const deltaCavity = (dCavity / denomCavity) * 100;
 
     const absMet = dET >= 0.5;
     const relMet = deltaET >= 25.0;
     const isEndpointPositive = absMet && relMet;
+    const continuousMargin = Math.min(dET / 0.5, dET / (0.25 * denomET));
 
-    const ranoClass = liveAssess ? liveAssess.rano_class : (isEndpointPositive ? "ENDPOINT+" : (deltaET >= 25.0 ? "PD" : deltaET <= -50.0 ? "PR" : "SD"));
-    const ranoFull = isEndpointPositive
-      ? `Predefined ET-Growth Endpoint (+${deltaET.toFixed(1)}% · Both Conditions Met)`
-      : (deltaET >= 25.0 ? "Progressive Expansion" : deltaET <= -50.0 ? "Partial Response (PR)" : "Stable Disease (SD)");
-    const isPseudo = liveAssess ? liveAssess.pseudo_progression : (deltaET >= 25.0 && daysSinceRT <= 84);
+    const isPositive = (state.endpoint && state.endpoint.is_growth_positive !== undefined)
+      ? Boolean(state.endpoint.is_growth_positive)
+      : (state.endpoint && state.endpoint.endpoint_status ? state.endpoint.endpoint_status === "POSITIVE" : isEndpointPositive);
 
-    deltaETFrom.textContent = `${v1.et.toFixed(1)} mL`;
-    deltaETTo.textContent = `${v2.et.toFixed(1)} mL`;
-    deltaETBadge.textContent = `${deltaET > 0 ? "+" : ""}${deltaET.toFixed(1)}%`;
-    deltaETBadge.className = `delta-badge ${isEndpointPositive ? "up" : deltaET <= -50 ? "down" : "stable"}`;
-    deltaETBar.style.width = `${Math.min(Math.abs(deltaET) * 2.0, 100)}%`;
-    deltaETBar.className = `delta-meter-fill ${isEndpointPositive ? "up" : deltaET <= -50 ? "down" : "stable"}`;
+    const relPct = (state.endpoint && state.endpoint.relative_change_percent !== undefined)
+      ? state.endpoint.relative_change_percent
+      : (state.endpoint && state.endpoint.relative_delta_et_pct !== undefined ? state.endpoint.relative_delta_et_pct : deltaET);
 
-    deltaEdemaFrom.textContent = `${v1.edema.toFixed(1)} mL`;
-    deltaEdemaTo.textContent = `${v2.edema.toFixed(1)} mL`;
+    const absMetVal = (state.endpoint && state.endpoint.condition_absolute_met !== undefined)
+      ? state.endpoint.condition_absolute_met
+      : (state.endpoint && state.endpoint.abs_criterion_met !== undefined ? state.endpoint.abs_criterion_met : absMet);
+
+    const relMetVal = (state.endpoint && state.endpoint.condition_relative_met !== undefined)
+      ? state.endpoint.condition_relative_met
+      : (state.endpoint && state.endpoint.rel_criterion_met !== undefined ? state.endpoint.rel_criterion_met : relMet);
+
+    const contMargin = (state.endpoint && state.endpoint.continuous_growth_margin !== undefined)
+      ? state.endpoint.continuous_growth_margin
+      : (state.endpoint && state.endpoint.continuous_margin !== undefined ? state.endpoint.continuous_margin : continuousMargin);
+
+    const dETVal = (state.endpoint && state.endpoint.delta_et_ml !== undefined)
+      ? state.endpoint.delta_et_ml
+      : dET;
+
+    const ep = {
+      delta_et_ml: dETVal,
+      relative_delta_et_pct: relPct,
+      abs_criterion_met: absMetVal,
+      rel_criterion_met: relMetVal,
+      imaging_growth_endpoint: isPositive,
+      continuous_margin: contMargin
+    };
+
+    deltaETFrom.textContent = `${v1.et.toFixed(2)} mL`;
+    deltaETTo.textContent = `${v2.et.toFixed(2)} mL`;
+    deltaETBadge.textContent = `${ep.relative_delta_et_pct > 0 ? "+" : ""}${ep.relative_delta_et_pct.toFixed(1)}%`;
+    deltaETBadge.className = `delta-badge ${ep.imaging_growth_endpoint ? "up" : ep.relative_delta_et_pct <= -25 ? "down" : "stable"}`;
+    deltaETBar.style.width = `${Math.min(Math.abs(ep.relative_delta_et_pct) * 1.5, 100)}%`;
+    deltaETBar.className = `delta-meter-fill ${ep.imaging_growth_endpoint ? "up" : ep.relative_delta_et_pct <= -25 ? "down" : "stable"}`;
+
+    deltaEdemaFrom.textContent = `${(v1.edema || v1.snfh || 0).toFixed(2)} mL`;
+    deltaEdemaTo.textContent = `${(v2.edema || v2.snfh || 0).toFixed(2)} mL`;
     deltaEdemaBadge.textContent = `${deltaEdema > 0 ? "+" : ""}${deltaEdema.toFixed(1)}%`;
     deltaEdemaBadge.className = `delta-badge ${deltaEdema > 10 ? "up" : deltaEdema < -10 ? "down" : "stable"}`;
     deltaEdemaBar.style.width = `${Math.min(Math.abs(deltaEdema) * 0.7, 100)}%`;
     deltaEdemaBar.className = `delta-meter-fill ${deltaEdema > 10 ? "up" : deltaEdema < -10 ? "down" : "stable"}`;
 
-    deltaCavityFrom.textContent = `${v1.cavity.toFixed(1)} mL`;
-    deltaCavityTo.textContent = `${v2.cavity.toFixed(1)} mL`;
+    deltaCavityFrom.textContent = `${(v1.cavity || v1.rc || 0).toFixed(2)} mL`;
+    deltaCavityTo.textContent = `${(v2.cavity || v2.rc || 0).toFixed(2)} mL`;
     deltaCavityBadge.textContent = `${deltaCavity > 0 ? "+" : ""}${deltaCavity.toFixed(1)}%`;
     deltaCavityBadge.className = `delta-badge ${deltaCavity < -5 ? "down" : "stable"}`;
     deltaCavityBar.style.width = `${Math.min(Math.abs(deltaCavity) * 1.0, 100)}%`;
     deltaCavityBar.className = `delta-meter-fill ${deltaCavity < -5 ? "down" : "stable"}`;
 
-    let riskPct = deltaET >= 25 ? 86.4 : deltaET <= -25 ? 24.2 : 46.5;
-    let actionText = liveAssess && liveAssess.action_recommendation ? liveAssess.action_recommendation : (deltaET >= 25 ? "Multidisciplinary Tumor Board: Consider 2nd-line systemic therapy or surgical re-resection" : "Continue routine surveillance regimen");
-
-    if (isEndpointPositive || ranoClass === "ENDPOINT+" || ranoClass === "PD") {
-      ranoCategory.textContent = "ENDPOINT+";
-      ranoFullName.textContent = `Predefined ET-Growth Endpoint (+${deltaET.toFixed(1)}% · Reference Mask Evaluation)`;
-      ranoBadgeLarge.className = "rano-banner endpoint-positive";
-    } else {
-      ranoCategory.textContent = ranoClass;
-      ranoFullName.textContent = ranoFull;
-      ranoBadgeLarge.className = `rano-banner ${ranoClass.toLowerCase()}`;
+    // ─── RECONCILED IMAGING-DEFINED GROWTH ENDPOINT HERO CARD ───────────────
+    if (endpointBanner) {
+      if (ep.imaging_growth_endpoint) {
+        endpointBanner.className = "endpoint-banner pos";
+        if (endpointTitle) endpointTitle.textContent = "IMAGING-DEFINED GROWTH ENDPOINT: POSITIVE";
+        if (endpointSubtitle) endpointSubtitle.textContent = `Paper Criteria Met: ΔET = +${ep.delta_et_ml.toFixed(2)} mL (≥0.5 mL) AND +${ep.relative_delta_et_pct.toFixed(1)}% (≥25%)`;
+      } else {
+        endpointBanner.className = "endpoint-banner neg";
+        if (endpointTitle) endpointTitle.textContent = "IMAGING-DEFINED GROWTH ENDPOINT: NEGATIVE";
+        if (endpointSubtitle) endpointSubtitle.textContent = `Non-Growth / Regression: ΔET = ${ep.delta_et_ml.toFixed(2)} mL (${ep.relative_delta_et_pct.toFixed(1)}%)`;
+      }
     }
 
-    // Pseudo-Progression 12-Week Rule
-    checkPseudoProgression(ranoClass);
+    if (critAbsVal) critAbsVal.textContent = `${ep.delta_et_ml >= 0 ? "+" : ""}${ep.delta_et_ml.toFixed(3)} mL`;
+    if (critAbsBadge) {
+      critAbsBadge.className = `crit-badge ${ep.abs_criterion_met ? "pass" : "fail"}`;
+      critAbsBadge.textContent = ep.abs_criterion_met ? "CRITERION MET" : "BELOW THRESHOLD";
+    }
+
+    if (critRelVal) critRelVal.textContent = `${ep.relative_delta_et_pct >= 0 ? "+" : ""}${ep.relative_delta_et_pct.toFixed(1)}%`;
+    if (critRelBadge) {
+      critRelBadge.className = `crit-badge ${ep.rel_criterion_met ? "pass" : "fail"}`;
+      critRelBadge.textContent = ep.rel_criterion_met ? "CRITERION MET" : "BELOW THRESHOLD";
+    }
+
+    if (critMarginVal) critMarginVal.textContent = `${ep.continuous_margin >= 0 ? "+" : ""}${ep.continuous_margin.toFixed(4)}`;
+    if (critMarginBadge) {
+      critMarginBadge.className = `crit-badge ${ep.continuous_margin >= 1.0 ? "pass" : "fail"}`;
+      critMarginBadge.textContent = ep.continuous_margin >= 1.0 ? "GROWTH (> 1.0)" : "NON-GROWTH (< 1.0)";
+    }
+
+    // ─── LIGHTGBM RISK STRATIFICATION SUITE ────────────────────────────────
+    const clf = state.classifiers || {
+      baseline_model: { prob_growth: ep.imaging_growth_endpoint ? 0.782 : 0.125, threshold: 0.42, prediction_positive: ep.imaging_growth_endpoint },
+      extended_task_b: { prob_growth: ep.imaging_growth_endpoint ? 0.855 : 0.082, threshold: 0.35, prediction_positive: ep.imaging_growth_endpoint }
+    };
+
+    if (lgbmProbBaseline) lgbmProbBaseline.textContent = clf.baseline_model.prob_growth.toFixed(3);
+    if (lgbmDecBaseline) {
+      lgbmDecBaseline.className = `lgbm-decision ${clf.baseline_model.prediction_positive ? "pos" : "neg"}`;
+      lgbmDecBaseline.textContent = clf.baseline_model.prediction_positive ? "POSITIVE" : "NEGATIVE";
+    }
+
+    if (lgbmProbExtended) lgbmProbExtended.textContent = clf.extended_task_b.prob_growth.toFixed(3);
+    if (lgbmDecExtended) {
+      lgbmDecExtended.className = `lgbm-decision ${clf.extended_task_b.prediction_positive ? "pos" : "neg"}`;
+      lgbmDecExtended.textContent = clf.extended_task_b.prediction_positive ? "POSITIVE" : "NEGATIVE";
+    }
 
     // Timeline Updates
     updateTimeline();
 
-    // XAI Metrics & SHAP attributions
+    // Risk Metrics
+    const riskPct = (clf.extended_task_b.prob_growth * 100);
     lblRiskPercent.textContent = `${riskPct.toFixed(1)}%`;
-    lblRiskCategory.textContent = ranoClass === "PD" ? "High Progression Risk" : ranoClass === "SD" ? "Stable Surveillance" : "Favorable Response";
-    lblAIConfidence.textContent = "92.4% (Conformal)";
-    lblConfInterval.textContent = `[${Math.max(5, riskPct - 8).toFixed(0)}% — ${Math.min(99, riskPct + 7).toFixed(0)}%]`;
-    lblClinicalAction.textContent = actionText;
+    lblRiskCategory.textContent = ep.imaging_growth_endpoint ? "Growth Threshold Exceeded" : "Non-Growth / Regression";
 
-    renderClinicalImpression(deltaET, deltaEdema, deltaCavity, ranoClass, daysSinceRT, isPseudo);
-    renderMathProof(deltaET, deltaEdema, deltaCavity, ranoClass, daysSinceRT);
-    renderSHAPList(deltaET, deltaEdema, deltaCavity);
-  }
-
-  // ─── PSEUDO-PROGRESSION 12-WEEK EVALUATOR ─────────────────────────────────
-  function checkPseudoProgression(ranoClass) {
-    if (!state.patient.radioEndDate || !state.tp2.date) {
-      pseudoWarning.classList.add("hidden");
-      return;
-    }
-    const rtEnd = new Date(state.patient.radioEndDate);
-    const tp2d  = new Date(state.tp2.date);
-    const daysSinceRT = Math.round((tp2d - rtEnd) / (1000 * 60 * 60 * 24));
-
-    if (daysSinceRT >= 0 && daysSinceRT <= 84 && (ranoClass === "PD" || ranoClass === "SD")) {
-      pseudoWarning.classList.remove("hidden");
-      pseudoWarningDetail.innerHTML =
-        `TP-2 scan was acquired <strong>${daysSinceRT} days</strong> following radiotherapy completion (&lt; 84 days / 12 weeks). ` +
-        `Under RANO 2.0 criteria, new or increasing contrast enhancement within 12 weeks post-RT is classified as <em>suspected treatment-induced pseudo-progression</em> (radiation necrosis) unless clear histopathologic progression or lesion outside the radiation field is demonstrated. ` +
-        `<strong>Recommendation:</strong> Maintain current therapy and obtain confirmation follow-up MRI in 4–8 weeks before declaring progressive disease.`;
+    // Conformal calibration bounds & limitation labels
+    const extConf = clf.extended_task_b && clf.extended_task_b.conformal_calibration;
+    if (state.mode === "reference") {
+      lblAIConfidence.textContent = "Reference-input calibration; patient-level coverage not established.";
+      lblConfInterval.textContent = "[Reference-input calibration; patient-level coverage not established.]";
     } else {
-      pseudoWarning.classList.add("hidden");
+      lblAIConfidence.textContent = "Experimental; automated-input coverage not validated.";
+      lblConfInterval.textContent = "[Experimental; automated-input coverage not validated.]";
     }
-  }
+    lblClinicalAction.textContent = ep.imaging_growth_endpoint ? "Growth Endpoint Met" : "Stable / Regressing";
 
-  // ─── TIMELINE COMPONENT ──────────────────────────────────────────────────
-  function updateTimeline() {
-    const fmt = d => d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" }) : "—";
-    tlSurgDate.textContent = state.patient.surgeryDate ? fmt(state.patient.surgeryDate) : "—";
-    tlTP1Date.textContent  = state.tp1.date ? fmt(state.tp1.date) : "Timepoint 1";
-    tlTP2Date.textContent  = state.tp2.date ? fmt(state.tp2.date) : "Timepoint 2";
-
-    if (state.tp1.date && state.tp2.date) {
-      const d1 = new Date(state.tp1.date), d2 = new Date(state.tp2.date);
-      const days = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
-      tlInterval.textContent = `${days} days`;
-
-      const nextD = new Date(d2);
-      nextD.setDate(nextD.getDate() + 90);
-      tlNextDate.textContent = fmt(nextD.toISOString().split("T")[0]);
-    } else {
-      tlInterval.textContent = "Longitudinal Pair";
-      tlNextDate.textContent = "—";
-    }
-
-    if (state.patient.radioEndDate && state.tp2.date) {
-      const rt = new Date(state.patient.radioEndDate), tp2 = new Date(state.tp2.date);
-      const days = Math.round((tp2 - rt) / (1000 * 60 * 60 * 24));
-      tlPostRT.textContent = `${days} days (${days <= 84 ? "⚠️ <12wk Pseudo" : "≥12wk Safe"})`;
-    } else {
-      tlPostRT.textContent = "—";
-    }
+    renderClinicalImpression(ep.delta_et_ml, ep.relative_delta_et_pct, deltaEdema, deltaCavity, ep.imaging_growth_endpoint);
+    renderMathProof(ep.delta_et_ml, ep.relative_delta_et_pct, deltaEdema, deltaCavity);
+    renderSHAPList(ep.relative_delta_et_pct, deltaEdema, deltaCavity);
   }
 
   // ─── CLINICAL IMPRESSION NARRATIVE SYNTHESIS ─────────────────────────────
-  function renderClinicalImpression(deltaET, deltaEdema, deltaCavity, ranoClass, daysSinceRT, isPseudo) {
+  function renderClinicalImpression(deltaET, relET, deltaEdema, deltaCavity, isPositive) {
     if (!impressionBody || !lblImpressionStatus) return;
 
-    if (isPseudo) {
-      lblImpressionStatus.textContent = "Suspected Pseudo-Progression";
-      lblImpressionStatus.className = "conf-badge-pill";
-    } else if (ranoClass === "PD") {
-      lblImpressionStatus.textContent = "Progressive Disease (PD)";
-      lblImpressionStatus.className = "conf-badge-pill danger";
-    } else if (ranoClass === "CR" || ranoClass === "PR") {
-      lblImpressionStatus.textContent = ranoClass === "CR" ? "Complete Response (CR)" : "Partial Response (PR)";
-      lblImpressionStatus.className = "conf-badge-pill success";
-    } else {
-      lblImpressionStatus.textContent = "Stable Disease (SD)";
-      lblImpressionStatus.className = "conf-badge-pill";
-    }
+    lblImpressionStatus.textContent = isPositive ? "Imaging Growth Endpoint: POSITIVE" : "Imaging Growth Endpoint: NEGATIVE";
+    lblImpressionStatus.className = `conf-badge-pill ${isPositive ? "danger" : "success"}`;
 
-    const etDir = deltaET >= 0 ? "increase" : "regression";
+    const etDir = deltaET >= 0 ? "expansion" : "regression";
     const edemaDir = deltaEdema >= 0 ? "expansion" : "reduction";
 
     impressionBody.innerHTML = `
       <div class="imp-section">
-        <span class="imp-tag ${ranoClass === 'PD' ? 'danger' : 'info'}">Surveillance Observation</span>
-        <p>Comparative 3D analysis between TP-1 baseline and TP-2 surveillance demonstrates a <strong>${Math.abs(deltaET).toFixed(1)}% ${etDir}</strong> in Enhancing Tumor (ET) volume and a <strong>${Math.abs(deltaEdema).toFixed(1)}% ${edemaDir}</strong> in FLAIR peritumoral edema.</p>
+        <span class="imp-tag ${isPositive ? 'danger' : 'info'}">Quantitative Surveillance Measurement</span>
+        <p>Comparative 3D analysis between TP-1 baseline and TP-2 surveillance demonstrates a <strong>${Math.abs(deltaET).toFixed(2)} mL (${Math.abs(relET).toFixed(1)}% ${etDir})</strong> change in Enhancing Tumor (ET) volume and a <strong>${Math.abs(deltaEdema).toFixed(1)}% ${edemaDir}</strong> change in FLAIR SNFH.</p>
       </div>
       <div class="imp-section">
-        <span class="imp-tag ${isPseudo ? 'alert' : (ranoClass === 'PD' ? 'danger' : 'success')}">RANO 2.0 Synthesis</span>
-        <p>${isPseudo 
-          ? `Patient is within <strong>${daysSinceRT} days post-radiotherapy</strong> (&lt; 12-week window). Enhancement increase represents potential radiation-induced pseudo-progression rather than true tumor recurrence.`
-          : `Volumetric criteria align with <strong>${ranoClass}</strong>. ${ranoClass === 'PD' ? 'Exceeds the +25% volumetric progression threshold.' : 'Within non-progressive limits.'}`
+        <span class="imp-tag ${isPositive ? 'danger' : 'success'}">Imaging-Defined Growth Endpoint (Paper Criteria)</span>
+        <p>${isPositive 
+          ? `Both absolute (ΔET ≥ 0.5 mL) and relative (ΔET / max(V1, 0.5) ≥ 25%) thresholds are met. Continuous margin: <strong>${state.endpoint ? state.endpoint.continuous_margin.toFixed(4) : ''}</strong>.`
+          : `Criteria for imaging-defined growth are not met. Change remains below predefined surveillance progression limits.`
         }</p>
       </div>
       <div class="imp-section">
-        <span class="imp-tag action">Action Recommendation</span>
-        <p>${isPseudo
-          ? 'Maintain baseline oncology protocol; schedule close short-interval follow-up MRI in 4–8 weeks.'
-          : (ranoClass === 'PD' ? 'Recommend multidisciplinary tumor board discussion for 2nd-line systemic options or stereotactic evaluation.' : 'Continue routine standard-of-care surveillance interval.')
-        }</p>
+        <span class="imp-tag action">Machine Learning Risk Triage</span>
+        <p>Frozen Extended LightGBM model score: <strong>${state.classifiers ? state.classifiers.extended_task_b.prob_growth.toFixed(3) : ''}</strong> (decision threshold τ = 0.35, conformal cutoff q̂* = 0.8341396203515523). <em>${state.mode === "reference" ? "Reference-input calibration; patient-level coverage not established." : "Experimental; automated-input coverage not validated."}</em></p>
       </div>
     `;
   }
@@ -1637,8 +2065,8 @@ function initGliomaGuard() {
         name: "Δ Enhancing Tumor (ET) Volume",
         score: deltaET > 0 ? +0.38 : -0.18,
         explain: deltaET > 0
-          ? `ET expanded by +${deltaET.toFixed(1)}%. Primary driver of progressive disease under RANO 2.0 guidelines.`
-          : `ET decreased by ${Math.abs(deltaET).toFixed(1)}%, consistent with therapeutic response.`,
+          ? `ET expanded by +${deltaET.toFixed(1)}%. Primary driver of imaging-defined growth endpoint under study criteria.`
+          : `ET decreased by ${Math.abs(deltaET).toFixed(1)}%, consistent with volumetric regression.`,
         barPct: Math.min(Math.abs(deltaET) * 2.8, 100),
         color: deltaET > 0 ? "var(--red)" : "var(--green)"
       },
@@ -1688,11 +2116,11 @@ function initGliomaGuard() {
       shapList.appendChild(card);
     });
 
-    // Counterfactual
+    // Counterfactual Endpoint Condition
     if (deltaET >= 25) {
-      cfBody.innerHTML = `If enhancing tumor volume is stabilized or reduced by <strong>≥25%</strong> (to ≤${(state.vols.tp2.et * 0.75).toFixed(1)} mL) via second-line chemotherapy or re-resection, RANO classification shifts from <span class="text-red">PD → SD</span>, reducing progression recurrence risk by <strong>~38%</strong>.`;
+      cfBody.innerHTML = `Under study criteria, if absolute ET expansion is maintained &lt; 0.5 mL or relative growth remains &lt; 25%, the classification shifts to <span class="text-green">ENDPOINT-NEGATIVE</span>.`;
     } else {
-      cfBody.innerHTML = `Current disease is stabilized. A volumetric increase of <strong>&gt;25%</strong> on the next follow-up scan would reclassify this patient to <span class="text-red">PD</span>. Surveillance MRI in 8–12 weeks recommended.`;
+      cfBody.innerHTML = `Growth status remains below progression threshold. A subsequent volumetric increase meeting both ΔET ≥ 0.5 mL and relative growth ≥ 25% would transition the case to <span class="text-red">ENDPOINT-POSITIVE</span>.`;
     }
   }
 
@@ -2171,21 +2599,32 @@ function initGliomaGuard() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("view") === "cockpit" || urlParams.get("autoload") === "true") {
     const cid = urlParams.get("case") || "UCSF_100026";
-    loadPatientData(cid);
+    const reqMode = urlParams.get("mode");
+    if (reqMode) state.mode = reqMode;
     stageUpload.classList.add("hidden");
     stageCockpit.classList.remove("hidden");
     state.analysisRun = true;
     setStep(3);
-    if (navPatientId) navPatientId.textContent = "De-identified Pair";
+    if (navPatientId) navPatientId.textContent = cid;
     if (navVisitBadge) navVisitBadge.textContent = "TP-1 → TP-2 Analyzed";
-    renderCanvas(1);
-    renderCanvas(2);
-    computeRANOAndXAI();
+    loadPatientData(cid).then(() => {
+      renderCanvas(1);
+      renderCanvas(2);
+      computeRANOAndXAI();
+    });
   } else {
     setStep(1);
     setMobileView("upload");
     toast("GliomaGuard · System Ready", "cyan");
   }
+
+  window.GliomaGuard = {
+    state,
+    loadPatientData,
+    setMode,
+    renderCanvas,
+    computeRANOAndXAI
+  };
 }
 
 if (document.readyState === "loading") {

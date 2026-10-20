@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "description": "Precomputed, authoritative audited runs for GliomaGuard lightweight research viewer",
+  "dataset_attribution": {
+    "primary_collection": "University of Missouri Post-operative Glioma Dataset (MU-Glioma-Post)",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "doi": "10.7937/7K9K-3C83",
+    "citation": "Yaseen, D., Garrett, F., Gass, J., Greaser, J., Isufi, E., Layfield, L. J., Nada, A., Porgorzelski, K., Sinclair, J., Tahon, N. H. M., & Thacker, J. (2025). University of Missouri Post-operative Glioma Dataset (MU-Glioma-Post) (Version 1) [Data set]. The Cancer Imaging Archive. https://doi.org/10.7937/7K9K-3C83",
+    "data_policy": "TCIA Data Usage Policy: Scientific research and education use permitted. Re-identification strictly prohibited.",
+    "external_benchmark_collection": "University of California San Francisco Adult Longitudinal Post-Treatment Diffuse Glioma (UCSF-ALPTDG)",
+    "external_benchmark_license": "UCSF Ci2 Data Use Agreement (Strictly Non-Commercial Scientific Research)",
+    "external_benchmark_citation": "Fields, B. K. K., et al. (2024). The University of California San Francisco Adult Longitudinal Post-Treatment Diffuse Glioma MRI Dataset. Radiology: Artificial Intelligence."
+  },
+  "jobs": {
+    "98c33b66": {
+      "case_id": "PatientID_0018",
+      "description": "Positive Growth Case (Internal Validation Pair TP-4 -> TP-5)",
+      "pair": "Timepoint_4 -> Timepoint_5",
+      "slice_range": [
+        45,
+        75
+      ],
+      "default_slice": 68,
+      "endpoint_status": "POSITIVE",
+      "delta_et_ml": 14.866999999999999,
+      "relative_change_percent": 471.51918807484935,
+      "baseline_prob": 0.7855,
+      "extended_prob": 0.95,
+      "extended_conformal_label": "GROWTH_PREDICTED",
+      "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+      "tp1_fused_mask_sha256": "7b26922cca716b08530fd81f7087d3b234906af3c12957cc19d4011ff8b88cb4",
+      "tp2_fused_mask_sha256": "b5bd1ced0f3e7d82d4940bf640947a58f0c392b4d5b0f02d8f74e209af24f637"
+    },
+    "b903d506": {
+      "case_id": "PatientID_0022",
+      "description": "Negative / Non-Growth Case (Internal Validation Pair TP-2 -> TP-3)",
+      "pair": "Timepoint_2 -> Timepoint_3",
+      "slice_range": [
+        40,
+        70
+      ],
+      "default_slice": 55,
+      "endpoint_status": "NEGATIVE",
+      "delta_et_ml": -50.734,
+      "relative_change_percent": -97.55412836980348,
+      "baseline_prob": 0.6068,
+      "extended_prob": 0.1669,
+      "extended_conformal_label": "NON_GROWTH",
+      "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+      "tp1_fused_mask_sha256": "43183dd38c309a9ca4f773380e1f7a2602600b1f52bd1d20bed9f51e9aa24868",
+      "tp2_fused_mask_sha256": "19401db6fd6e6abb527c13dd0261fa97ecb92a42413f83deeb2fad0c04c57165"
+    }
+  }
+}

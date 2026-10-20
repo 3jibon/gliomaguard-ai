@@ -1,0 +1,152 @@
+{
+  "job_id": "98c33b66",
+  "status": "COMPLETED",
+  "progress_percent": 100,
+  "message": "Frozen pipeline execution complete (133.22s)",
+  "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+  "tp1_files": {
+    "t1n": "packaged/t1n.nii.gz",
+    "t1c": "packaged/t1c.nii.gz",
+    "t2w": "packaged/t2w.nii.gz",
+    "flair": "packaged/flair.nii.gz"
+  },
+  "tp2_files": {
+    "t1n": "packaged/t1n.nii.gz",
+    "t1c": "packaged/t1c.nii.gz",
+    "t2w": "packaged/t2w.nii.gz",
+    "flair": "packaged/flair.nii.gz"
+  },
+  "gap": 1.0,
+  "result": {
+    "job_id": "98c33b66",
+    "provenance": "precomputed automated prediction (audited frozen four-model ensemble)",
+    "total_execution_seconds": 133.22,
+    "endpoint_assessment": {
+      "delta_et_ml": 14.866999999999999,
+      "relative_change_percent": 471.51918807484935,
+      "denominator_floor_ml": 3.153,
+      "condition_absolute_met": true,
+      "condition_relative_met": true,
+      "endpoint_status": "POSITIVE",
+      "is_growth_positive": true,
+      "continuous_growth_margin": 18.860767522993974,
+      "rule_specification": "delta_ET >= 0.5 mL AND delta_ET / max(baseline_ET, 0.5 mL) >= 25.0%"
+    },
+    "classifiers": {
+      "status": "success",
+      "baseline": {
+        "features_used": 8,
+        "probability": 0.7855,
+        "prob_growth": 0.7855,
+        "operating_threshold": 0.42,
+        "threshold": 0.42,
+        "prediction": 1,
+        "prediction_positive": true,
+        "classification": "GROWTH_PREDICTED"
+      },
+      "baseline_model": {
+        "features_used": 8,
+        "probability": 0.7855,
+        "prob_growth": 0.7855,
+        "operating_threshold": 0.42,
+        "threshold": 0.42,
+        "prediction": 1,
+        "prediction_positive": true,
+        "classification": "GROWTH_PREDICTED"
+      },
+      "extended_task_b": {
+        "features_used": 15,
+        "probability": 0.95,
+        "prob_growth": 0.95,
+        "operating_threshold": 0.35,
+        "threshold": 0.35,
+        "prediction": 1,
+        "prediction_positive": true,
+        "classification": "GROWTH_PREDICTED",
+        "conformal_calibration": {
+          "alpha": 0.05,
+          "target_nominal_coverage": 0.95,
+          "conformal_cutoff_q_hat": 0.8341396203515523,
+          "conformal_cutoff_rounded": 0.8341,
+          "threshold_lower": 0.1658603796484477,
+          "threshold_upper": 0.8341396203515523,
+          "prediction_set": [
+            "GROWTH_PREDICTED"
+          ],
+          "prediction_set_type": "SINGLETON",
+          "status": "EXPERIMENTAL_AUTOMATED_INPUT_COVERAGE_NOT_VALIDATED",
+          "label_bn": "\u09aa\u09b0\u09c0\u0995\u09cd\u09b7\u09be\u09ae\u09c2\u09b2\u0995, coverage \u09af\u09be\u099a\u09be\u0987 \u09b9\u09df\u09a8\u09bf",
+          "validation_empirical_coverage": 0.9744,
+          "validation_single_label_efficiency": 0.4487,
+          "validation_ambiguous_rate": 0.5513,
+          "limitation": "Automated input conformal triage: Experimental research indicator only; coverage is not mathematically guaranteed (nominal 95% coverage calibrated on expert manual annotations only under exchangeability)."
+        }
+      },
+      "limitation_statement": "Automated input conformal triage: Experimental research indicator only; coverage is not mathematically guaranteed (nominal 95% coverage calibrated on expert manual annotations only under exchangeability)."
+    },
+    "features_task_b": {
+      "gap": 1.0,
+      "et_base": 3.153,
+      "snfh_base": 96.156,
+      "rc_base": 14.405000000000001,
+      "netc_base": 0.089,
+      "compaction_proxy_base": 0.7725944000499481,
+      "ratio_et_edema_base": 0.032790465493572944,
+      "ratio_et_cavity_base": 0.21888233252342934,
+      "delta_snfh": -57.489000000000004,
+      "rel_snfh": -0.5978722076625483,
+      "vel_snfh": -57.489000000000004,
+      "delta_rc": -12.280000000000001,
+      "vel_rc": -12.280000000000001,
+      "delta_netc": 1.4140000000000001,
+      "vel_netc": 1.4140000000000001
+    },
+    "baseline_tp1": {
+      "volumes_ml": {
+        "netc": 0.089,
+        "snfh": 96.156,
+        "et": 3.153,
+        "rc": 14.405000000000001
+      },
+      "voxel_counts": {
+        "netc": 89,
+        "snfh": 96156,
+        "et": 3153,
+        "rc": 14405
+      },
+      "inference_seconds": 86.55,
+      "fused_sha256": "7b26922cca716b08530fd81f7087d3b234906af3c12957cc19d4011ff8b88cb4"
+    },
+    "followup_tp2": {
+      "volumes_ml": {
+        "netc": 1.5030000000000001,
+        "snfh": 38.667,
+        "et": 18.02,
+        "rc": 2.125
+      },
+      "voxel_counts": {
+        "netc": 1503,
+        "snfh": 38667,
+        "et": 18020,
+        "rc": 2125
+      },
+      "inference_seconds": 40.95,
+      "fused_sha256": "b5bd1ced0f3e7d82d4940bf640947a58f0c392b4d5b0f02d8f74e209af24f637"
+    },
+    "system_info": {
+      "device": "cuda:0",
+      "gpu_name": "NVIDIA GeForce RTX 2050",
+      "pytorch_version": "2.11.0+cu128"
+    }
+  },
+  "error": null,
+  "created_at": 1760000000.0,
+  "total_execution_seconds": 133.22,
+  "case_id": "PatientID_0018",
+  "pair": "Timepoint_4 -> Timepoint_5",
+  "slice_range": [
+    45,
+    75
+  ],
+  "default_slice": 68
+}
