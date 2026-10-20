@@ -1,5 +1,5 @@
 /* =====================================================================
-   GLIOMAGUARD AI™ — CLINICAL LONGITUDINAL ANALYSIS SYSTEM
+   GLIOMAGUARD — CLINICAL LONGITUDINAL ANALYSIS SYSTEM
    Modern Clinical Glassmorphism · High-Contrast · Mobile-First UI
    ===================================================================== */
 
@@ -1301,10 +1301,10 @@ select.clean-input option {
   margin-top: 4px;
 }
 
-.rano-banner.pd .rano-code { color: var(--red); text-shadow: 0 0 16px var(--red-glow); }
+.rano-banner.pd .rano-code, .rano-banner.endpoint-positive .rano-code { color: var(--red); text-shadow: 0 0 16px var(--red-glow); }
 .rano-banner.sd .rano-code { color: var(--gold); text-shadow: 0 0 16px var(--gold-glow); }
 .rano-banner.pr .rano-code { color: var(--cyan); text-shadow: 0 0 16px var(--cyan-glow); }
-.rano-banner.cr .rano-code { color: var(--green); text-shadow: 0 0 16px var(--green-glow); }
+.rano-banner.cr .rano-code, .rano-banner.endpoint-negative .rano-code { color: var(--green); text-shadow: 0 0 16px var(--green-glow); }
 
 /* PSEUDO WARNING */
 .pseudo-box {
@@ -1368,12 +1368,14 @@ select.clean-input option {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .delta-row-label {
-  font-size: 0.76rem;
+  font-size: 0.69rem;
   font-weight: 600;
   color: var(--text-secondary);
+  line-height: 1.2;
 }
 
 .delta-badge {
@@ -2430,7 +2432,7 @@ select.clean-input option {
   line-height: 1.45;
 }
 
-/* MATHEMATICAL PROOF & VOXEL AUDIT BOX */
+/* TRANSPARENT VOXEL-WISE GROWTH DERIVATION BOX */
 .math-proof-box {
   background: rgba(10, 15, 28, 0.95);
   border: 1px solid var(--border-cyan);
@@ -2467,16 +2469,16 @@ select.clean-input option {
 .math-formulas-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-size: 0.67rem;
 }
 
 .math-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
+  padding: 3px 6px;
   background: var(--bg-surface);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--cyan);

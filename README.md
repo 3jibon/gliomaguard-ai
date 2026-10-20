@@ -1,5 +1,5 @@
 ---
-title: GliomaGuard AI - Longitudinal Surveillance Engine
+title: GliomaGuard - Longitudinal Surveillance Engine
 emoji: 🧠
 colorFrom: blue
 colorTo: indigo
@@ -8,7 +8,7 @@ app_port: 7860
 pinned: false
 ---
 
-# GliomaGuard AI™ — Longitudinal Glioma Surveillance System
+# GliomaGuard — Longitudinal Glioma Surveillance System
 
 Clinical translational decision support web application embodying the research paper's core `Trio-GliomaNet` deep learning ensemble and RANO 2.0 longitudinal surveillance framework.
 

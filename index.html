@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GliomaGuard AI™ — Longitudinal Glioma Surveillance & Decision Support</title>
+  <title>GliomaGuard — Longitudinal Glioma Surveillance & Decision Support</title>
   <meta name="description" content="Clinical-grade longitudinal glioma MRI analysis: dual follow-up comparison, RANO 2.0 classification, pseudo-progression detection, and explainable AI.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,8 +24,8 @@
           <path d="M14 14 L18 18 L24 12" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="brand-text">
-          <div class="brand-title">GliomaGuard <span class="ai-badge">AI</span></div>
-          <div class="brand-subtitle">Longitudinal Glioma Surveillance · RANO 2.0</div>
+          <div class="brand-title">GliomaGuard</div>
+          <div class="brand-subtitle">Longitudinal Glioma Surveillance · Research Prototype</div>
         </div>
       </div>
     </div>
@@ -246,7 +246,7 @@
                 <optgroup label="🧪 External UCSF Validation Cohort (Section 7 Benchmark)">
                   <option value="UCSF_100001">UCSF-100001 · Partial Response (PR, -64.7%) · Tumor Regression</option>
                   <option value="UCSF_100005">UCSF-100005 · Stable Disease (SD, +5.9%) · Stable Surveillance</option>
-                  <option value="UCSF_100026">UCSF-100026 · Progressive Disease (PD, +49.0%) · Nodular Recurrence</option>
+                  <option value="UCSF_100026">De-identified Pair · Reference Volumes (+48.9%) · Growth Endpoint</option>
                 </optgroup>
                 <optgroup label="🏥 Internal MU-Glioma Development Cohort">
                   <option value="PatientID_0018">PatientID_0018 · Progressive Disease (PD, +25.6%) · ⚠️ Pseudo-Progression Rule</option>
@@ -293,15 +293,15 @@
         <div class="cockpit-patient-switch">
           <span class="cockpit-switch-lbl">Active Case:</span>
           <select id="cockpitSelectPatient" class="clean-cohort-select-sm">
-            <optgroup label="🧪 External UCSF Validation">
-              <option value="UCSF_100001">UCSF-100001 · PR (-64.7%) · Regression</option>
-              <option value="UCSF_100005">UCSF-100005 · SD (+5.9%) · Stable</option>
-              <option value="UCSF_100026">UCSF-100026 · PD (+49.0%) · Recurrence</option>
+            <optgroup label="🧪 Validation Cohorts">
+              <option value="UCSF_100026" selected>De-identified Pair · Reference Volumes (+48.9%) · Growth Endpoint</option>
+              <option value="UCSF_100001">UCSF-100001 · Favorable Regression (-64.7%)</option>
+              <option value="UCSF_100005">UCSF-100005 · Surveillance Stability (+5.9%)</option>
             </optgroup>
-            <optgroup label="🏥 Internal MU Cohort">
-              <option value="PatientID_0018">PatientID_0018 · PD (+25.6%) · ⚠️ Pseudo-Prog</option>
-              <option value="PatientID_0003">PatientID_0003 · SD (+10.1%) · Stable</option>
-              <option value="PatientID_0005">PatientID_0005 · PR (-35.5%) · Regression</option>
+            <optgroup label="🏥 Internal Research Cohort">
+              <option value="PatientID_0018">PatientID_0018 · Growth (+25.6%) · ⚠️ Post-RT Interval</option>
+              <option value="PatientID_0003">PatientID_0003 · Stability (+10.1%)</option>
+              <option value="PatientID_0005">PatientID_0005 · Regression (-35.5%)</option>
             </optgroup>
           </select>
         </div>
@@ -351,10 +351,10 @@
 
           <!-- CLEAN CONTROL STRIP (MASK TOGGLE OUTSIDE CANVAS) -->
           <div class="viewer-sub-toolbar">
-            <span class="sub-date" id="lblTP1Date">— / Pending Upload</span>
+            <span class="sub-date" id="lblTP1Date">Timepoint 1</span>
             <label class="toggle-lbl">
               <input type="checkbox" id="chkMask1" checked>
-              <span class="toggle-text">AI Segmentation Mask</span>
+              <span class="toggle-text">Reference Segmentation Overlay</span>
             </label>
           </div>
 
@@ -397,12 +397,12 @@
         <!-- CENTER COLUMN: RANO 2.0 & DELTA VOLUMETRICS -->
         <section class="panel-card metrics-card" id="panelRANO">
           
-          <!-- RANO 2.0 CLASSIFICATION HERO -->
+          <!-- GROWTH ENDPOINT ASSESSMENT HERO -->
           <div class="rano-hero-card" id="ranoResultCard">
-            <div class="card-caption">RANO 2.0 Longitudinal Response</div>
-            <div class="rano-banner" id="ranoBadgeLarge">
-              <div class="rano-code" id="ranoCategory">PD</div>
-              <div class="rano-desc" id="ranoFullName">Progressive Disease</div>
+            <div class="card-caption">Longitudinal Growth Assessment (Reference Volumetrics)</div>
+            <div class="rano-banner endpoint-positive" id="ranoBadgeLarge">
+              <div class="rano-code" id="ranoCategory">ENDPOINT+</div>
+              <div class="rano-desc" id="ranoFullName">Predefined ET-Growth Endpoint (+48.9% · Reference Mask Evaluation)</div>
             </div>
 
             <!-- PSEUDO-PROGRESSION ALERT -->
@@ -419,7 +419,7 @@
           <div class="delta-block">
             <div class="block-title">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00f0ff" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-              Volumetric Δ Changes (TP1 → TP2)
+              Reference Volumetric Δ Changes (TP1 → TP2)
             </div>
 
             <!-- ET DELTA -->
@@ -441,16 +441,16 @@
             <!-- EDEMA DELTA -->
             <div class="delta-row" id="deltaEdemaCard">
               <div class="delta-row-top">
-                <span class="delta-row-label">Vasogenic Edema (SNFH)</span>
-                <span class="delta-badge up" id="deltaEdemaBadge">+18.1%</span>
+                <span class="delta-row-label">Surrounding non-enhancing FLAIR hyperintensity (SNFH)</span>
+                <span class="delta-badge up" id="deltaEdemaBadge">+133.8%</span>
               </div>
               <div class="delta-values">
-                <span id="deltaEdemaFrom">91.7 mL</span>
+                <span id="deltaEdemaFrom">12.5 mL</span>
                 <span class="delta-arrow">→</span>
-                <strong id="deltaEdemaTo">108.3 mL</strong>
+                <strong id="deltaEdemaTo">29.2 mL</strong>
               </div>
               <div class="delta-meter">
-                <div class="delta-meter-fill up" id="deltaEdemaBar" style="width: 45%;"></div>
+                <div class="delta-meter-fill up" id="deltaEdemaBar" style="width: 75%;"></div>
               </div>
             </div>
 
@@ -475,7 +475,7 @@
           <div class="math-proof-box" id="mathProofBox">
             <div class="math-proof-header">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00f0ff" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-              <span>Transparent Voxel-Wise Mathematical Proof</span>
+              <span>Transparent Reference-Mask Growth Derivation</span>
               <span class="math-tag-live">LIVE COMPUTATION</span>
             </div>
             <div class="math-formulas-list" id="mathFormulasList">
@@ -496,23 +496,23 @@
               <div class="tl-point">
                 <div class="tl-dot tp1"></div>
                 <span class="tl-title">TP-1</span>
-                <span class="tl-sub" id="tlTP1Date">—</span>
+                <span class="tl-sub" id="tlTP1Date">Timepoint 1</span>
               </div>
               <div class="tl-connector"></div>
               <div class="tl-point">
                 <div class="tl-dot tp2"></div>
                 <span class="tl-title">TP-2</span>
-                <span class="tl-sub" id="tlTP2Date">—</span>
+                <span class="tl-sub" id="tlTP2Date">Timepoint 2</span>
               </div>
               <div class="tl-connector dashed"></div>
               <div class="tl-point">
                 <div class="tl-dot next"></div>
                 <span class="tl-title">Next</span>
-                <span class="tl-sub" id="tlNextDate">~90d</span>
+                <span class="tl-sub" id="tlNextDate">—</span>
               </div>
             </div>
             <div class="tl-meta-text">
-              <span>Interval: <strong id="tlInterval">90 days</strong></span>
+              <span>Interval: <strong id="tlInterval">Longitudinal Pair</strong></span>
               <span>Post-RT: <strong id="tlPostRT">—</strong></span>
             </div>
           </div>
@@ -633,10 +633,10 @@
 
           <!-- CLEAN CONTROL STRIP -->
           <div class="viewer-sub-toolbar">
-            <span class="sub-date" id="lblTP2Date">— / Pending Upload</span>
+            <span class="sub-date" id="lblTP2Date">Timepoint 2</span>
             <label class="toggle-lbl">
               <input type="checkbox" id="chkMask2" checked>
-              <span class="toggle-text">AI Segmentation Mask</span>
+              <span class="toggle-text">Reference Segmentation Overlay</span>
             </label>
           </div>
 
@@ -754,9 +754,9 @@
   <footer class="statusbar">
     <div class="status-left">
       <span class="status-dot live"></span>
-      <span>GliomaGuard AI™ <strong>v2.0 Longitudinal</strong></span>
+      <span>GliomaGuard <strong>v2.0 Research Prototype</strong></span>
       <span class="sep">|</span>
-      <span>Latency: <strong id="txtClientLatency">1.2 ms</strong></span>
+      <span>Software Workflow Demonstration · Academic &amp; Research Use Only</span>
     </div>
     <div class="status-right">
       <span>Free Academic Prototype · Mobile &amp; PC Optimized</span>

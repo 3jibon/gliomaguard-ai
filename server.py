@@ -1,4 +1,4 @@
-"""High-Performance Lightweight Web Server for GliomaGuard AI™ Clinical Web Application.
+"""High-Performance Lightweight Web Server for GliomaGuard Clinical Web Application.
 Serves static assets, live latency profiling endpoints, and native 3D NIfTI (.nii / .nii.gz) ingestion.
 Powered by genuine Trio-GliomaNet real-time deep learning inference. Zero memorization.
 """
@@ -344,7 +344,7 @@ class GliomaGuardRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             payload = {
                 "status": "online",
-                "system": "GliomaGuard AI™ Clinical Cockpit",
+                "system": "GliomaGuard Clinical Cockpit",
                 "version": "2.0-Longitudinal",
                 "inference_engine": "Trio-GliomaNet Live PyTorch",
                 "nifti_support": "Enabled (nibabel 5.4+)",
@@ -438,7 +438,7 @@ def run_server(port=PORT):
         try:
             httpd = ThreadedHTTPServer(("", p), GliomaGuardRequestHandler)
             print("=" * 75)
-            print(f"GLIOMAGUARD AI™ CLINICAL SERVER STARTED SUCCESSFULLY")
+            print(f"GLIOMAGUARD CLINICAL SERVER STARTED SUCCESSFULLY")
             print("=" * 75)
             print(f"  Local URL       : http://localhost:{p}")
             print(f"  Network Address : http://127.0.0.1:{p}")

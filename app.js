@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * GLIOMAGUARD AI™ — LONGITUDINAL SURVEILLANCE ENGINE (app.js)
+ * GLIOMAGUARD — LONGITUDINAL SURVEILLANCE ENGINE (app.js)
  * Real Multi-Modal MRI Rendering · RANO 2.0 Assessment · Explainable AI (SHAP)
  * Mobile-First & Desktop Responsive Interactive Architecture
  * =============================================================================
@@ -126,27 +126,29 @@ function initGliomaGuard() {
       days_since_rt: 168
     },
     "UCSF_100026": {
-      id: "UCSF_100026",
+      id: "De-identified Pair",
       v1_name: "Timepoint_1",
       v2_name: "Timepoint_2",
       default_slice: 92,
       slice_min: 77,
       slice_max: 107,
       folder: "data/patients/UCSF_100026",
-      surgeryDate: "2025-09-05",
-      radioEndDate: "2025-11-12",
+      surgeryDate: null,
+      radioEndDate: null,
+      tp1_date: "",
+      tp2_date: "",
       grade: "grade4",
       mgmt: "unmethylated",
       steroids: "no",
-      vols_tp1: { et: 5.74, edema: 12.51, cavity: 5.38, netc: 0.0 },
-      vols_tp2: { et: 8.55, edema: 29.23, cavity: 0.20, netc: 0.81 },
-      delta_et: 49.0,
-      delta_edema: 133.7,
-      delta_cavity: -96.3,
-      rano_class: "PD",
-      rano_full: "Progressive Disease (PD, +49.0% Nodular Recurrence)",
-      pseudo_progression: true,
-      days_since_rt: 59
+      vols_tp1: { et: 5.743000272777863, edema: 12.505000593955629, cavity: 5.380000255536288, netc: 0.0 },
+      vols_tp2: { et: 8.552000406198204, edema: 29.23500138858799, cavity: 0.1970000093569979, netc: 0.8100000384729356 },
+      delta_et: 48.91171861396483,
+      delta_edema: 133.786485,
+      delta_cavity: -96.33829,
+      rano_class: "ENDPOINT+",
+      rano_full: "Predefined ET-Growth Endpoint (+48.9% · Reference Mask Evaluation)",
+      pseudo_progression: false,
+      days_since_rt: 999
     }
   };
 
@@ -398,11 +400,9 @@ function initGliomaGuard() {
       mriUrl = s.niftiSlices[String(s.sliceNum)] || (s.niftiData ? s.niftiSlices[String(s.niftiData.default_slice)] : null) || s.customUrl;
     }
 
-    const currentPatient = (typeof PATIENTS_DATABASE !== 'undefined' && PATIENTS_DATABASE[state.patient.id])
-      ? PATIENTS_DATABASE[state.patient.id]
-      : (typeof PATIENTS_DATABASE !== 'undefined' && PATIENTS_DATABASE["PatientID_0018"])
-        ? PATIENTS_DATABASE["PatientID_0018"]
-        : { folder: "data", default_slice: 68 };
+    const currentPatient = (typeof PATIENTS_DATABASE !== 'undefined' && (PATIENTS_DATABASE[state.patient.caseKey] || PATIENTS_DATABASE[state.patient.id] || PATIENTS_DATABASE["UCSF_100026"]))
+      ? (PATIENTS_DATABASE[state.patient.caseKey] || PATIENTS_DATABASE[state.patient.id] || PATIENTS_DATABASE["UCSF_100026"])
+      : { folder: "data/patients/UCSF_100026", default_slice: 92 };
     const baseFolder = currentPatient.folder || "data";
     const subFolder = (baseFolder === "data") ? folder : (tp === 1 ? "tp1" : "tp2");
     const resolvedPath = (baseFolder === "data") ? `data/${folder}` : `${baseFolder}/${subFolder}`;
@@ -474,7 +474,7 @@ function initGliomaGuard() {
           }
         } else {
           // AI Real-Time Segmentation Overlay for custom uploaded scans:
-          // Enhancing Tumor (ET) in bright warm amber/gold, Vasogenic Edema in cyan
+          // Enhancing Tumor (ET) in bright warm amber/gold, SNFH in cyan
           try {
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const d = imgData.data;
@@ -1171,6 +1171,7 @@ function initGliomaGuard() {
     state.tp2.niftiData = null;
     state.tp2.niftiSlices = null;
 
+    state.patient.caseKey = pid;
     state.patient.id = p.id;
     state.patient.surgeryDate = p.surgeryDate;
     state.patient.radioEndDate = p.radioEndDate;
@@ -1195,17 +1196,15 @@ function initGliomaGuard() {
     if (txtSliceTotal2) txtSliceTotal2.textContent = p.slice_max;
 
     // Dates
-    const today = new Date();
-    const tp2d = new Date(today); tp2d.setDate(today.getDate() - 5);
-    const tp1d = new Date(tp2d);  tp1d.setDate(tp2d.getDate() - 90);
-    const fmt = d => d.toISOString().split("T")[0];
+    const tp1DateStr = p.tp1_date || "";
+    const tp2DateStr = p.tp2_date || "";
 
-    dateTP1.value = fmt(tp1d); state.tp1.date = fmt(tp1d);
-    dateTP2.value = fmt(tp2d); state.tp2.date = fmt(tp2d);
+    dateTP1.value = tp1DateStr; state.tp1.date = tp1DateStr;
+    dateTP2.value = tp2DateStr; state.tp2.date = tp2DateStr;
 
     inputPatientId.value = p.id;
-    inputSurgeryDate.value = p.surgeryDate;
-    inputRadioEnd.value = p.radioEndDate;
+    inputSurgeryDate.value = p.surgeryDate || "";
+    inputRadioEnd.value = p.radioEndDate || "";
     selectGrade.value = p.grade;
     selectMGMT.value = p.mgmt;
 
@@ -1232,12 +1231,12 @@ function initGliomaGuard() {
     if (volET1) volET1.textContent = `${p.vols_tp1.et.toFixed(1)} mL`;
     if (volEdema1) volEdema1.textContent = `${p.vols_tp1.edema.toFixed(1)} mL`;
     if (volCavity1) volCavity1.textContent = `${p.vols_tp1.cavity.toFixed(1)} mL`;
-    if (lblTP1Date) lblTP1Date.textContent = state.tp1.date;
+    if (lblTP1Date) lblTP1Date.textContent = state.tp1.date || "Timepoint 1";
 
     if (volET2) volET2.textContent = `${p.vols_tp2.et.toFixed(1)} mL`;
     if (volEdema2) volEdema2.textContent = `${p.vols_tp2.edema.toFixed(1)} mL`;
     if (volCavity2) volCavity2.textContent = `${p.vols_tp2.cavity.toFixed(1)} mL`;
-    if (lblTP2Date) lblTP2Date.textContent = state.tp2.date;
+    if (lblTP2Date) lblTP2Date.textContent = state.tp2.date || "Timepoint 2";
 
     // Re-render immediately if already on Analysis screen
     if (state.analysisRun) {
@@ -1254,6 +1253,7 @@ function initGliomaGuard() {
   const btnLoadCohortPatient = $("btnLoadCohortPatient");
   if (btnLoadCohortPatient && selectCohortPatient) {
     btnLoadCohortPatient.addEventListener("click", () => {
+      state.demoLoaded = true;
       loadPatientData(selectCohortPatient.value);
     });
   }
@@ -1386,8 +1386,8 @@ function initGliomaGuard() {
     volEdema2.textContent = `${v2.edema.toFixed(1)} mL`;
     volCavity2.textContent = `${v2.cavity.toFixed(1)} mL`;
 
-    if (lblTP1Date) lblTP1Date.textContent = state.tp1.date || "Baseline";
-    if (lblTP2Date) lblTP2Date.textContent = state.tp2.date || "Follow-Up";
+    if (lblTP1Date) lblTP1Date.textContent = state.tp1.date || "Timepoint 1";
+    if (lblTP2Date) lblTP2Date.textContent = state.tp2.date || "Timepoint 2";
 
     // Calculate Days Since RT
     let daysSinceRT = 999;
@@ -1416,40 +1416,61 @@ function initGliomaGuard() {
       console.warn("Live assessment query note:", e);
     }
 
-    const deltaET = liveAssess ? liveAssess.delta_et : ((v2.et - v1.et) / (v1.et || 1)) * 100;
-    const deltaEdema = liveAssess ? liveAssess.delta_edema : ((v2.edema - v1.edema) / (v1.edema || 1)) * 100;
-    const deltaCavity = liveAssess ? liveAssess.delta_cav : ((v2.cavity - v1.cavity) / (v1.cavity || 1)) * 100;
-    const ranoClass = liveAssess ? liveAssess.rano_class : (deltaET >= 25 ? "PD" : deltaET <= -50 ? "PR" : "SD");
-    const ranoFull = liveAssess ? liveAssess.rano_full : (ranoClass === "PD" ? "Progressive Disease (PD)" : ranoClass === "PR" ? "Partial Response (PR)" : "Stable Disease (SD)");
-    const isPseudo = liveAssess ? liveAssess.pseudo_progression : (deltaET >= 25 && daysSinceRT <= 84);
+    const dET = v2.et - v1.et;
+    const denomET = Math.max(v1.et, 0.5);
+    const deltaET = liveAssess ? liveAssess.delta_et : (dET / denomET) * 100;
+
+    const dEdema = v2.edema - v1.edema;
+    const denomEdema = Math.max(v1.edema, 0.5);
+    const deltaEdema = liveAssess ? liveAssess.delta_edema : (dEdema / denomEdema) * 100;
+
+    const dCavity = v2.cavity - v1.cavity;
+    const denomCavity = Math.max(v1.cavity, 0.5);
+    const deltaCavity = liveAssess ? liveAssess.delta_cav : (dCavity / denomCavity) * 100;
+
+    const absMet = dET >= 0.5;
+    const relMet = deltaET >= 25.0;
+    const isEndpointPositive = absMet && relMet;
+
+    const ranoClass = liveAssess ? liveAssess.rano_class : (isEndpointPositive ? "ENDPOINT+" : (deltaET >= 25.0 ? "PD" : deltaET <= -50.0 ? "PR" : "SD"));
+    const ranoFull = isEndpointPositive
+      ? `Predefined ET-Growth Endpoint (+${deltaET.toFixed(1)}% · Both Conditions Met)`
+      : (deltaET >= 25.0 ? "Progressive Expansion" : deltaET <= -50.0 ? "Partial Response (PR)" : "Stable Disease (SD)");
+    const isPseudo = liveAssess ? liveAssess.pseudo_progression : (deltaET >= 25.0 && daysSinceRT <= 84);
 
     deltaETFrom.textContent = `${v1.et.toFixed(1)} mL`;
     deltaETTo.textContent = `${v2.et.toFixed(1)} mL`;
     deltaETBadge.textContent = `${deltaET > 0 ? "+" : ""}${deltaET.toFixed(1)}%`;
-    deltaETBadge.className = `delta-badge ${deltaET >= 25 ? "up" : deltaET <= -50 ? "down" : "stable"}`;
-    deltaETBar.style.width = `${Math.min(Math.abs(deltaET) * 2.5, 100)}%`;
-    deltaETBar.className = `delta-meter-fill ${deltaET >= 25 ? "up" : deltaET <= -50 ? "down" : "stable"}`;
+    deltaETBadge.className = `delta-badge ${isEndpointPositive ? "up" : deltaET <= -50 ? "down" : "stable"}`;
+    deltaETBar.style.width = `${Math.min(Math.abs(deltaET) * 2.0, 100)}%`;
+    deltaETBar.className = `delta-meter-fill ${isEndpointPositive ? "up" : deltaET <= -50 ? "down" : "stable"}`;
 
     deltaEdemaFrom.textContent = `${v1.edema.toFixed(1)} mL`;
     deltaEdemaTo.textContent = `${v2.edema.toFixed(1)} mL`;
     deltaEdemaBadge.textContent = `${deltaEdema > 0 ? "+" : ""}${deltaEdema.toFixed(1)}%`;
     deltaEdemaBadge.className = `delta-badge ${deltaEdema > 10 ? "up" : deltaEdema < -10 ? "down" : "stable"}`;
-    deltaEdemaBar.style.width = `${Math.min(Math.abs(deltaEdema) * 2.2, 100)}%`;
+    deltaEdemaBar.style.width = `${Math.min(Math.abs(deltaEdema) * 0.7, 100)}%`;
     deltaEdemaBar.className = `delta-meter-fill ${deltaEdema > 10 ? "up" : deltaEdema < -10 ? "down" : "stable"}`;
 
     deltaCavityFrom.textContent = `${v1.cavity.toFixed(1)} mL`;
     deltaCavityTo.textContent = `${v2.cavity.toFixed(1)} mL`;
     deltaCavityBadge.textContent = `${deltaCavity > 0 ? "+" : ""}${deltaCavity.toFixed(1)}%`;
     deltaCavityBadge.className = `delta-badge ${deltaCavity < -5 ? "down" : "stable"}`;
-    deltaCavityBar.style.width = `${Math.min(Math.abs(deltaCavity) * 3, 100)}%`;
+    deltaCavityBar.style.width = `${Math.min(Math.abs(deltaCavity) * 1.0, 100)}%`;
     deltaCavityBar.className = `delta-meter-fill ${deltaCavity < -5 ? "down" : "stable"}`;
 
     let riskPct = deltaET >= 25 ? 86.4 : deltaET <= -25 ? 24.2 : 46.5;
     let actionText = liveAssess && liveAssess.action_recommendation ? liveAssess.action_recommendation : (deltaET >= 25 ? "Multidisciplinary Tumor Board: Consider 2nd-line systemic therapy or surgical re-resection" : "Continue routine surveillance regimen");
 
-    ranoCategory.textContent = ranoClass;
-    ranoFullName.textContent = ranoFull;
-    ranoBadgeLarge.className = `rano-banner ${ranoClass.toLowerCase()}`;
+    if (isEndpointPositive || ranoClass === "ENDPOINT+" || ranoClass === "PD") {
+      ranoCategory.textContent = "ENDPOINT+";
+      ranoFullName.textContent = `Predefined ET-Growth Endpoint (+${deltaET.toFixed(1)}% · Reference Mask Evaluation)`;
+      ranoBadgeLarge.className = "rano-banner endpoint-positive";
+    } else {
+      ranoCategory.textContent = ranoClass;
+      ranoFullName.textContent = ranoFull;
+      ranoBadgeLarge.className = `rano-banner ${ranoClass.toLowerCase()}`;
+    }
 
     // Pseudo-Progression 12-Week Rule
     checkPseudoProgression(ranoClass);
@@ -1493,9 +1514,9 @@ function initGliomaGuard() {
   // ─── TIMELINE COMPONENT ──────────────────────────────────────────────────
   function updateTimeline() {
     const fmt = d => d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" }) : "—";
-    tlSurgDate.textContent = fmt(state.patient.surgeryDate);
-    tlTP1Date.textContent  = fmt(state.tp1.date);
-    tlTP2Date.textContent  = fmt(state.tp2.date);
+    tlSurgDate.textContent = state.patient.surgeryDate ? fmt(state.patient.surgeryDate) : "—";
+    tlTP1Date.textContent  = state.tp1.date ? fmt(state.tp1.date) : "Timepoint 1";
+    tlTP2Date.textContent  = state.tp2.date ? fmt(state.tp2.date) : "Timepoint 2";
 
     if (state.tp1.date && state.tp2.date) {
       const d1 = new Date(state.tp1.date), d2 = new Date(state.tp2.date);
@@ -1505,12 +1526,17 @@ function initGliomaGuard() {
       const nextD = new Date(d2);
       nextD.setDate(nextD.getDate() + 90);
       tlNextDate.textContent = fmt(nextD.toISOString().split("T")[0]);
+    } else {
+      tlInterval.textContent = "Longitudinal Pair";
+      tlNextDate.textContent = "—";
     }
 
     if (state.patient.radioEndDate && state.tp2.date) {
       const rt = new Date(state.patient.radioEndDate), tp2 = new Date(state.tp2.date);
       const days = Math.round((tp2 - rt) / (1000 * 60 * 60 * 24));
       tlPostRT.textContent = `${days} days (${days <= 84 ? "⚠️ <12wk Pseudo" : "≥12wk Safe"})`;
+    } else {
+      tlPostRT.textContent = "—";
     }
   }
 
@@ -1562,28 +1588,43 @@ function initGliomaGuard() {
     if (!mathFormulasList) return;
     const v1 = state.vols.tp1;
     const v2 = state.vols.tp2;
-    const etStatusClass = deltaET >= 25 ? "danger" : deltaET <= -25 ? "success" : "";
-    const edemaStatusClass = deltaEdema > 15 ? "warning" : deltaEdema < -10 ? "success" : "";
+    // Calculate strictly from verified full-precision source volumes
+    const dET = v2.et - v1.et;
+    const denomET = Math.max(v1.et, 0.5);
+    const relET = (dET / denomET) * 100;
+    const absMet = dET >= 0.5;
+    const relMet = relET >= 25.0;
+    const endpointMet = absMet && relMet;
+
+    const dEdema = v2.edema - v1.edema;
+    const denomEdema = Math.max(v1.edema, 0.5);
+    const relEdema = (dEdema / denomEdema) * 100;
+
+    const dCavity = v2.cavity - v1.cavity;
+    const denomCavity = Math.max(v1.cavity, 0.5);
+    const relCavity = (dCavity / denomCavity) * 100;
 
     mathFormulasList.innerHTML = `
-      <div class="math-row ${etStatusClass}">
-        <span>Δ ET: ((${v2.et.toFixed(1)} - ${v1.et.toFixed(1)}) / ${v1.et.toFixed(1)}) × 100</span>
-        <strong>${deltaET >= 0 ? "+" : ""}${deltaET.toFixed(1)}% (Threshold: ≥+25% → PD)</strong>
+      <div class="math-row ${absMet ? 'danger' : ''}">
+        <span>Absolute ΔET: (${v2.et.toFixed(3)} - ${v1.et.toFixed(3)}) = ${dET >= 0 ? "+" : ""}${dET.toFixed(3)} mL</span>
+        <strong>ΔET ≥ 0.5 mL → ${absMet ? `MET (+${dET.toFixed(3)} ≥ 0.5 mL)` : "NOT MET"}</strong>
       </div>
-      <div class="math-row ${edemaStatusClass}">
-        <span>Δ Edema: ((${v2.edema.toFixed(1)} - ${v1.edema.toFixed(1)}) / ${v1.edema.toFixed(1)}) × 100</span>
-        <strong>${deltaEdema >= 0 ? "+" : ""}${deltaEdema.toFixed(1)}%</strong>
+      <div class="math-row ${relMet ? 'danger' : ''}">
+        <span>Relative ΔET: (+${dET.toFixed(3)} / max(${v1.et.toFixed(3)}, 0.5)) × 100 = ${relET >= 0 ? "+" : ""}${relET.toFixed(1)}%</span>
+        <strong>Relative ≥ 25% → ${relMet ? `MET (+${relET.toFixed(1)}% ≥ 25%)` : "NOT MET"}</strong>
+      </div>
+      <div class="math-row ${endpointMet ? 'danger' : ''}">
+        <span>ET-Growth Endpoint: Absolute ≥ 0.5 mL AND Relative ≥ 25%</span>
+        <strong>Decision: ${endpointMet ? "ENDPOINT-POSITIVE (Reference Mask)" : "ENDPOINT-NEGATIVE"}</strong>
       </div>
       <div class="math-row">
-        <span>Δ Cavity: ((${v2.cavity.toFixed(1)} - ${v1.cavity.toFixed(1)}) / ${v1.cavity.toFixed(1)}) × 100</span>
-        <strong>${deltaCavity >= 0 ? "+" : ""}${deltaCavity.toFixed(1)}%</strong>
+        <span>Δ SNFH: ((${v2.edema.toFixed(3)} - ${v1.edema.toFixed(3)}) / max(${v1.edema.toFixed(3)}, 0.5)) × 100</span>
+        <strong>${relEdema >= 0 ? "+" : ""}${relEdema.toFixed(1)}% (${dEdema >= 0 ? "+" : ""}${dEdema.toFixed(3)} mL)</strong>
       </div>
-      ${daysSinceRT !== null ? `
-      <div class="math-row ${daysSinceRT <= 84 ? 'warning' : ''}">
-        <span>Post-RT Interval: (Date_TP2 - Date_RT_End)</span>
-        <strong>${daysSinceRT} days ${daysSinceRT <= 84 ? '(≤ 84d → Pseudo-progression rule active)' : '(&gt; 84d)'}</strong>
+      <div class="math-row">
+        <span>Δ Cavity (RC): ((${v2.cavity.toFixed(3)} - ${v1.cavity.toFixed(3)}) / max(${v1.cavity.toFixed(3)}, 0.5)) × 100</span>
+        <strong>${relCavity >= 0 ? "+" : ""}${relCavity.toFixed(1)}% (${dCavity >= 0 ? "+" : ""}${dCavity.toFixed(3)} mL)</strong>
       </div>
-      ` : ''}
     `;
   }
 
@@ -1602,7 +1643,7 @@ function initGliomaGuard() {
         color: deltaET > 0 ? "var(--red)" : "var(--green)"
       },
       {
-        name: "Δ Vasogenic Edema Expansion (FLAIR)",
+        name: "Δ Non-Enhancing SNFH Expansion (FLAIR)",
         score: deltaEdema > 0 ? +0.22 : -0.09,
         explain: deltaEdema > 0
           ? `Peritumoral T2-FLAIR hyperintensity increased by +${deltaEdema.toFixed(1)}%, indicating tumor infiltration into surrounding brain parenchyma.`
@@ -2126,10 +2167,25 @@ function initGliomaGuard() {
   }
 
 
-  // Init Step 1
-  setStep(1);
-  setMobileView("upload");
-  toast("GliomaGuard AI™ · System Ready", "cyan");
+  // URL autoload check for cockpit view
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("view") === "cockpit" || urlParams.get("autoload") === "true") {
+    const cid = urlParams.get("case") || "UCSF_100026";
+    loadPatientData(cid);
+    stageUpload.classList.add("hidden");
+    stageCockpit.classList.remove("hidden");
+    state.analysisRun = true;
+    setStep(3);
+    if (navPatientId) navPatientId.textContent = "De-identified Pair";
+    if (navVisitBadge) navVisitBadge.textContent = "TP-1 → TP-2 Analyzed";
+    renderCanvas(1);
+    renderCanvas(2);
+    computeRANOAndXAI();
+  } else {
+    setStep(1);
+    setMobileView("upload");
+    toast("GliomaGuard · System Ready", "cyan");
+  }
 }
 
 if (document.readyState === "loading") {

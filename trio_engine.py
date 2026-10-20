@@ -1,4 +1,4 @@
-"""GliomaGuard AI(TM) -- Trio-GliomaNet Live Inference & Clinical Decision Engine.
+"""GliomaGuard -- Trio-GliomaNet Live Inference & Clinical Decision Engine.
 
 Provides genuine, real-time deep learning inference, longitudinal RANO 2.0 kinetics,
 and image-grounded Explainable AI (XAI) feature attribution.

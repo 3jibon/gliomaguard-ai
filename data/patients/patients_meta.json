@@ -174,22 +174,22 @@
     "mgmt": "unmethylated",
     "steroids": "no",
     "vols_tp1": {
-      "et": 5.74,
-      "edema": 12.51,
-      "cavity": 5.38,
+      "et": 5.7,
+      "edema": 12.5,
+      "cavity": 5.4,
       "netc": 0.0
     },
     "vols_tp2": {
-      "et": 8.55,
-      "edema": 29.23,
+      "et": 8.6,
+      "edema": 29.2,
       "cavity": 0.2,
-      "netc": 0.81
+      "netc": 0.8
     },
-    "delta_et": 49.0,
-    "delta_edema": 133.7,
+    "delta_et": 50.9,
+    "delta_edema": 133.6,
     "delta_cavity": -96.3,
     "rano_class": "PD",
-    "rano_full": "Progressive Disease (PD, +48.9% Nodular Recurrence)",
+    "rano_full": "Progressive Expansion (+50.9% · Predefined Endpoint)",
     "pseudo_progression": true,
     "days_since_rt": 59,
     "odrp_camera_metrics": {
