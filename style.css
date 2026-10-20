@@ -71,15 +71,26 @@ body {
 ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.25); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
 
+/* SHARED STICKY HEADER WRAPPER (BANNER ON TOP, NAVBAR BELOW) */
+.app-header-wrapper {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+}
+
 /* TOP NAVBAR */
 .navbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
+  position: relative;
+  width: 100%;
+  min-height: var(--header-h);
   background: rgba(7, 11, 18, 0.95);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(16px);
-  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -267,7 +278,7 @@ body {
 
 /* APP CONTAINER */
 .app-container {
-  margin-top: var(--header-h);
+  margin-top: 0;
   min-height: calc(100vh - var(--header-h) - var(--footer-h));
   padding-bottom: 20px;
 }
@@ -1837,6 +1848,84 @@ select.clean-input option {
   .step-indicator { display: none; }
   .brand-subtitle { display: none; }
 
+  .navbar {
+    height: auto;
+    min-height: var(--header-h);
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .nav-left {
+    flex-shrink: 0;
+  }
+
+  .nav-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .mode-switch-group {
+    max-width: 100%;
+    display: inline-flex;
+  }
+
+  .mode-btn {
+    font-size: 0.70rem;
+    padding: 4px 8px;
+  }
+
+  .provenance-badge {
+    font-size: 0.64rem;
+    padding: 3px 8px;
+  }
+
+  @media (max-width: 600px) {
+    .navbar {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+    .nav-left {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-right {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    .mode-switch-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      gap: 3px;
+    }
+    .mode-btn {
+      width: 100%;
+      text-align: center;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      border-radius: 10px;
+    }
+    .provenance-badge {
+      align-self: center;
+      text-align: center;
+      font-size: 0.64rem;
+      padding: 3px 10px;
+    }
+    .patient-pill {
+      align-self: center;
+    }
+  }
+
   .app-container {
     padding-bottom: calc(var(--mobile-nav-h) + 16px);
   }
@@ -2868,10 +2957,12 @@ select.clean-input option {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  width: 100%;
   backdrop-filter: blur(8px);
+}
+
+.hosted-viewer-banner .banner-text {
+  line-height: 1.4;
 }
 
 .hosted-viewer-banner strong {

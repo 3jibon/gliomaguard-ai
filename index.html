@@ -12,60 +12,63 @@
 </head>
 <body data-mobile-tab="upload" data-mri-view="split">
 
-  <!-- HOSTED VIEWER AUDIT BANNER -->
-  <div class="hosted-viewer-banner" id="hostedViewerBanner">
-    <span class="banner-dot"></span>
-    <span><strong>Hosted research viewer</strong> — precomputed automated results; fresh segmentation inference is not available on this service.</span>
-  </div>
-
-  <!-- TOP NAVBAR -->
-  <header class="navbar" id="mainNavbar">
-    <div class="nav-left">
-      <div class="brand-logo">
-        <svg class="logo-icon" viewBox="0 0 36 36" fill="none">
-          <circle cx="18" cy="18" r="16" stroke="#00f0ff" stroke-width="1.8" opacity="0.5"/>
-          <circle cx="18" cy="18" r="10" stroke="#00f0ff" stroke-width="1.5"/>
-          <circle cx="18" cy="18" r="4" fill="#00f0ff"/>
-          <path d="M18 4 L18 8 M18 28 L18 32 M4 18 L8 18 M28 18 L32 18" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M14 14 L18 18 L24 12" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div class="brand-text">
-          <div class="brand-title">GliomaGuard</div>
-          <div class="brand-subtitle">Longitudinal Glioma Surveillance · Research Prototype</div>
-        </div>
-      </div>
+  <!-- SHARED STICKY HEADER WRAPPER (BANNER ON TOP, NAVBAR BELOW) -->
+  <header class="app-header-wrapper" id="appHeaderWrapper">
+    <!-- HOSTED VIEWER AUDIT BANNER -->
+    <div class="hosted-viewer-banner" id="hostedViewerBanner">
+      <span class="banner-dot"></span>
+      <span class="banner-text"><strong>Hosted research viewer</strong> — precomputed automated results; fresh segmentation inference is not available on this service.</span>
     </div>
 
-    <div class="nav-center">
-      <div class="step-indicator" id="stepIndicator">
-        <div class="step-dot active" id="stepDot1">
-          <span class="step-num">1</span>
-          <span class="step-lbl">Upload Scans</span>
-        </div>
-        <div class="step-connector"></div>
-        <div class="step-dot" id="stepDot2">
-          <span class="step-num">2</span>
-          <span class="step-lbl">Clinical Context</span>
-        </div>
-        <div class="step-connector"></div>
-        <div class="step-dot" id="stepDot3">
-          <span class="step-num">3</span>
-          <span class="step-lbl">Analysis</span>
+    <!-- TOP NAVBAR -->
+    <nav class="navbar" id="mainNavbar">
+      <div class="nav-left">
+        <div class="brand-logo">
+          <svg class="logo-icon" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="16" stroke="#00f0ff" stroke-width="1.8" opacity="0.5"/>
+            <circle cx="18" cy="18" r="10" stroke="#00f0ff" stroke-width="1.5"/>
+            <circle cx="18" cy="18" r="4" fill="#00f0ff"/>
+            <path d="M18 4 L18 8 M18 28 L18 32 M4 18 L8 18 M28 18 L32 18" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 14 L18 18 L24 12" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="brand-text">
+            <div class="brand-title">GliomaGuard</div>
+            <div class="brand-subtitle">Longitudinal Glioma Surveillance · Research Prototype</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="nav-right">
-      <div class="mode-switch-group" id="navModeSwitch">
-        <button type="button" class="mode-btn active" id="btnModeRef">Mode 1: Reference Viewer</button>
-        <button type="button" class="mode-btn" id="btnModeAuto">Mode 2: Audited Automated Results</button>
+      <div class="nav-center">
+        <div class="step-indicator" id="stepIndicator">
+          <div class="step-dot active" id="stepDot1">
+            <span class="step-num">1</span>
+            <span class="step-lbl">Upload Scans</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-dot" id="stepDot2">
+            <span class="step-num">2</span>
+            <span class="step-lbl">Clinical Context</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-dot" id="stepDot3">
+            <span class="step-num">3</span>
+            <span class="step-lbl">Analysis</span>
+          </div>
+        </div>
       </div>
-      <div class="provenance-badge ref" id="provenanceBadgeNav">PROVENANCE: reference/demo measurement</div>
-      <div class="patient-pill">
-        <span class="patient-id" id="navPatientId">No Patient</span>
-        <span class="visit-badge" id="navVisitBadge">—</span>
+
+      <div class="nav-right">
+        <div class="mode-switch-group" id="navModeSwitch">
+          <button type="button" class="mode-btn active" id="btnModeRef">Mode 1: Reference Viewer</button>
+          <button type="button" class="mode-btn" id="btnModeAuto">Mode 2: Audited Automated Results</button>
+        </div>
+        <div class="provenance-badge ref" id="provenanceBadgeNav">PROVENANCE: reference/demo measurement</div>
+        <div class="patient-pill">
+          <span class="patient-id" id="navPatientId">No Patient</span>
+          <span class="visit-badge" id="navVisitBadge">—</span>
+        </div>
       </div>
-    </div>
+    </nav>
   </header>
 
   <!-- MOBILE BOTTOM NAVIGATION -->
